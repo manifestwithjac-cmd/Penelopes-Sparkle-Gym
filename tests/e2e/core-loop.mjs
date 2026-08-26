@@ -41,13 +41,11 @@ async function withPage(fn) {
 
 async function performCartwheel(page) {
   await page.getByText("GO!", { exact: false }).click();
-  for (let i = 0; i < 3; i++) {
-    await page
-      .locator(".tap-target")
-      .click({ timeout: 2000 })
-      .catch(() => {});
-  }
-  await page.locator(".result-panel").waitFor({ timeout: 3000 });
+  // Cartwheel now plays through the 3D flow (Floor3DTrick): one timing
+  // tap, then the actual 3D animation (~1.6s) before the result panel
+  // appears — longer wait than the old instant-feedback 2D flow.
+  await page.locator(".tap-target").click({ timeout: 2000 }).catch(() => {});
+  await page.locator(".result-panel").waitFor({ timeout: 6000 });
 }
 
 async function testCoreLoop() {
@@ -142,7 +140,14 @@ async function testShopEquipsLeotard() {
       );
     });
     await page.reload({ waitUntil: "networkidle" });
-    await page.getByText("Leotard Shop", { exact: true }).click();
+    // Shop doesn't have a 3D home yet — reached via the WorldMenu (🗺️).
+    await page.evaluate(() => document.querySelector('[aria-label="Around the gym"]').click());
+    await page.locator(".world-menu").waitFor({ timeout: 3000 });
+    await page.evaluate(() =>
+      [...document.querySelectorAll("button")]
+        .find((b) => b.textContent.includes("Leotard Shop"))
+        .click(),
+    );
     await page.locator(".shop-scene").waitFor({ timeout: 3000 });
 
     // Click via a direct DOM dispatch rather than a Locator: Playwright's
@@ -175,9 +180,22 @@ async function testFriendInteraction() {
     await page.getByText("PLAY", { exact: false }).click();
     await page.locator(".gym-scene").waitFor({ timeout: 3000 });
 
+    // Friends live in the Lounge now that the gym's main view is the 3D
+    // scene (spec: "prioritize Penelope" for 3D, friends stay 2D for now).
+    await page.evaluate(() =>
+      document.querySelector('[aria-label="Around the gym"]').click(),
+    );
+    await page.locator(".world-menu").waitFor({ timeout: 3000 });
     await page.evaluate(() => {
-      const btn = [...document.querySelectorAll(".friend-sprite")].find(
-        (b) => b.getAttribute("aria-label") === "Isabella",
+      [...document.querySelectorAll("button")]
+        .find((b) => b.textContent.includes("Friends Lounge"))
+        .click();
+    });
+    await page.locator(".lounge-scene").waitFor({ timeout: 3000 });
+
+    await page.evaluate(() => {
+      const btn = [...document.querySelectorAll(".lounge-scene__friend")].find((b) =>
+        b.textContent.includes("Isabella"),
       );
       btn.click();
     });
@@ -211,12 +229,28 @@ async function testWorldFeatures() {
     await page.getByText("PLAY", { exact: false }).click();
     await page.locator(".gym-scene").waitFor({ timeout: 3000 });
 
-    // The "67" wall easter egg (spec §4) should be present somewhere in
-    // the gym, unexplained, no objective attached.
-    const wallNumberText = await page.locator(".gym-decor__wall-number").innerText();
-    assert.equal(wallNumberText, "67", "the 67 easter egg is on a gym wall");
+    // The gym's main view is a real 3D scene now — the "67" wall easter
+    // egg (spec §4) is 3D text rendered inside the WebGL canvas, not a DOM
+    // node, so it isn't something a DOM assertion can check. Verified
+    // instead by rendering GymEnvironment and reading the screenshot
+    // (done manually during the 3D-9 regression pass).
+    //
+    // Shop/Lounge/Snack Bar/Trophies don't have a 3D home yet, so they're
+    // reached through the WorldMenu (the 🗺️ HUD button) instead of the
+    // old flat-card world.
+    async function openWorldMenu() {
+      await page.evaluate(() => document.querySelector('[aria-label="Around the gym"]').click());
+      await page.locator(".world-menu").waitFor({ timeout: 3000 });
+    }
+    async function goTo(label) {
+      await page.evaluate(
+        (l) => [...document.querySelectorAll("button")].find((b) => b.textContent.includes(l)).click(),
+        label,
+      );
+    }
 
-    await page.getByText("Snack Bar", { exact: true }).click();
+    await openWorldMenu();
+    await goTo("Snack Bar");
     await page.locator(".snackbar-scene").waitFor({ timeout: 3000 });
     await page.evaluate(() => {
       [...document.querySelectorAll(".snackbar-scene__snack")]
@@ -227,13 +261,14 @@ async function testWorldFeatures() {
     await page.getByText("Gym", { exact: true }).click();
     await page.locator(".gym-scene").waitFor({ timeout: 3000 });
 
-    await page.getByText("Friends Lounge", { exact: true }).click();
+    await openWorldMenu();
+    await goTo("Friends Lounge");
     await page.locator(".lounge-scene").waitFor({ timeout: 3000 });
     await page.getByText("See Achievements", { exact: false }).click();
     await page.locator(".trophy-scene").waitFor({ timeout: 3000 });
 
     assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
-    console.log("PASS: snack bar, lounge, trophy wall, and the 67 easter egg all work");
+    console.log("PASS: snack bar, lounge, and trophy wall all reachable via the world menu");
   });
 }
 
@@ -284,7 +319,9 @@ async function testSettingsResetAndDevMode() {
     await page.getByText("PLAY", { exact: false }).click();
     await page.locator(".gym-scene").waitFor({ timeout: 3000 });
 
-    await page.evaluate(() => document.querySelector(".gym-scene__settings-btn").click());
+    // Two buttons share the .gym-scene__settings-btn style (world menu
+    // and settings) — select by aria-label, not class, to hit the right one.
+    await page.evaluate(() => document.querySelector('[aria-label="Settings"]').click());
     await page.locator(".settings-panel").waitFor({ timeout: 3000 });
 
     // Reset requires an explicit confirm step — cancel must not reset.

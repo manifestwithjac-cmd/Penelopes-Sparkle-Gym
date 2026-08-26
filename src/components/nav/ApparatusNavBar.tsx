@@ -3,7 +3,7 @@ import type { ApparatusId } from "../../data/types";
 import "./ApparatusNavBar.css";
 
 interface ApparatusNavBarProps {
-  onSelect: (id: ApparatusId, worldPosition: number) => void;
+  onSelect: (id: ApparatusId) => void;
   activeId?: ApparatusId;
 }
 
@@ -17,7 +17,7 @@ export function ApparatusNavBar({ onSelect, activeId }: ApparatusNavBarProps) {
           key={a.id}
           className={`apparatus-nav__item ${activeId === a.id ? "apparatus-nav__item--active" : ""}`}
           style={{ background: `linear-gradient(160deg, ${a.colorFrom}, ${a.colorTo})` }}
-          onClick={() => onSelect(a.id, a.worldPosition)}
+          onClick={() => onSelect(a.id)}
         >
           <span className="apparatus-nav__icon">{a.icon}</span>
           <span className="apparatus-nav__label">{a.shortName}</span>

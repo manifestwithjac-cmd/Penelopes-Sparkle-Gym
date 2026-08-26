@@ -1,0 +1,63 @@
+.world-menu-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(90, 40, 110, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+}
+
+.world-menu {
+  position: relative;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: min(90vw, 360px);
+  width: 100%;
+  animation: worldMenuIn 260ms var(--ease-bounce);
+}
+
+@keyframes worldMenuIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.world-menu__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--pink-50);
+  font-size: 1.1rem;
+  color: var(--color-primary-strong);
+}
+
+.world-menu__title {
+  text-align: center;
+  font-size: 1.3rem;
+}
+
+.world-menu__grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.world-menu__grid .big-button {
+  justify-content: flex-start;
+  padding-left: var(--space-5);
+}

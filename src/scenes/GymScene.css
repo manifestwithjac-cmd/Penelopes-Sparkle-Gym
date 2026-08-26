@@ -1,10 +1,21 @@
 .gym-scene {
+  position: relative;
+  z-index: 1;
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #f3e6ff 0%, #fbe6f5 100%);
-  overflow: hidden;
+  /* The 3D canvas (three/GymCanvas.tsx) paints the whole background —
+     this overlay stays transparent so it shows through everywhere except
+     the HUD/nav chrome, which paint their own surfaces. */
+  background: transparent;
+  pointer-events: none;
+}
+
+.gym-scene__hud,
+.gym-scene__hud * ,
+.apparatus-nav {
+  pointer-events: auto;
 }
 
 .gym-scene__hud {
@@ -28,6 +39,10 @@
   gap: var(--space-2);
 }
 
+.gym-scene__spacer {
+  flex: 1;
+}
+
 .gym-scene__settings-btn {
   width: var(--tap-min);
   height: var(--tap-min);
@@ -43,176 +58,4 @@
 
 .gym-scene__settings-btn:active {
   transform: scale(0.9) rotate(20deg);
-}
-
-.gym-scene__world {
-  flex: 1;
-  position: relative;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-behavior: smooth;
-}
-
-.gym-scene__track {
-  position: relative;
-  height: 100%;
-  /* A track significantly wider than any viewport — this is what makes the
-     gym feel huge; zones sit at % positions along it so the layout scales
-     to any device without per-breakpoint tuning. */
-  width: max(2400px, 260vw);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 30%),
-    repeating-linear-gradient(
-      90deg,
-      #f6d9ff 0px,
-      #f6d9ff 120px,
-      #f0c9ff 120px,
-      #f0c9ff 240px
-    );
-}
-
-.gym-scene__floor-mats {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 34%;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--pink-300) 0px,
-    var(--pink-300) 80px,
-    var(--purple-300) 80px,
-    var(--purple-300) 160px
-  );
-  border-top: 8px solid var(--white);
-  opacity: 0.9;
-}
-
-.gym-decor__window {
-  position: absolute;
-  top: 6%;
-  width: 9%;
-  min-width: 90px;
-  aspect-ratio: 1.4 / 1;
-  background: linear-gradient(180deg, #d8f1ff, #aee3ff);
-  border: 8px solid var(--white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-soft);
-}
-
-.gym-decor__banner {
-  position: absolute;
-  top: 4%;
-  transform: translateX(-50%);
-  background: var(--pink-500);
-  color: var(--white);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(0.9rem, 2vw, 1.4rem);
-  padding: var(--space-2) var(--space-5);
-  border-radius: var(--radius-round);
-  box-shadow: var(--shadow-soft);
-  white-space: nowrap;
-}
-
-.gym-decor__trophy-shelf {
-  position: absolute;
-  top: 10%;
-  transform: translateX(-50%);
-  background: var(--white);
-  border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-4);
-  box-shadow: var(--shadow-soft);
-  font-size: 1.4rem;
-}
-
-.gym-decor__wall-number {
-  position: absolute;
-  top: 8%;
-  transform: translateX(-50%) rotate(-3deg);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(2rem, 5vw, 3.4rem);
-  color: rgba(132, 56, 224, 0.18);
-  user-select: none;
-}
-
-.gym-decor__star {
-  position: absolute;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1.2rem;
-}
-
-.gym-zone {
-  position: absolute;
-  bottom: 8%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  width: clamp(120px, 16vw, 190px);
-  height: clamp(120px, 16vw, 190px);
-  border-radius: var(--radius-lg);
-  color: var(--white);
-  box-shadow: var(--shadow-pop);
-  border: 4px solid rgba(255, 255, 255, 0.7);
-  transition: transform var(--dur-fast) var(--ease-bounce);
-}
-
-.gym-zone:active {
-  transform: translateX(-50%) scale(0.93);
-}
-
-.gym-zone__icon {
-  font-size: clamp(2rem, 5vw, 3rem);
-}
-
-.gym-zone__label {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(0.85rem, 2.2vw, 1.15rem);
-}
-
-.gym-zone--social {
-  top: 30%;
-  bottom: auto;
-  width: clamp(100px, 13vw, 150px);
-  height: clamp(100px, 13vw, 150px);
-}
-
-.gym-zone--soon {
-  opacity: 0.55;
-}
-
-.gym-zone__soon {
-  position: absolute;
-  bottom: -26px;
-  background: var(--white);
-  color: var(--color-primary-strong);
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: var(--radius-round);
-  white-space: nowrap;
-}
-
-.gym-scene__penelope {
-  position: absolute;
-  pointer-events: none;
-  bottom: 6%;
-  width: clamp(70px, 9vw, 110px);
-  height: clamp(98px, 13vw, 150px);
-  transform: translateX(-50%);
-  transition-property: left;
-  transition-timing-function: var(--ease-soft);
-  z-index: 5;
-  filter: drop-shadow(0 6px 6px rgba(120, 40, 130, 0.25));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gym-scene__world {
-    scroll-behavior: auto;
-  }
 }

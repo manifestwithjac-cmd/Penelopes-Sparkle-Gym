@@ -1,4 +1,12 @@
 .apparatus-scene {
+  /* Floor mounts the 3D canvas (three/GymCanvas.tsx) behind this overlay
+     as a position:fixed, z-index:0 element. A positioned sibling always
+     paints above non-positioned in-flow content regardless of DOM order,
+     so without an explicit stacking context here the canvas would sit on
+     top of (and swallow clicks on) this scene's own HUD — same fix as
+     .gym-scene. */
+  position: relative;
+  z-index: 1;
   height: 100%;
   width: 100%;
   display: flex;

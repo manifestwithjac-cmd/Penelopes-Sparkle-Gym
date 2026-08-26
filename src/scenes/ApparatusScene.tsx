@@ -24,11 +24,19 @@ export function ApparatusScene({ apparatusId }: { apparatusId: ApparatusId }) {
   const goToScene = useGameStore((s) => s.goToScene);
   const Minigame = MINIGAMES[apparatusId];
 
+  // Floor has a real 3D scene rendering behind it (a persistent <Canvas>
+  // mounted in App.tsx) — stay transparent so it shows through instead of
+  // painting over it. Every other apparatus still uses its flat gradient
+  // until they get the same 3D treatment.
+  const is3D = apparatusId === "floor";
+
   return (
     <div
       className="apparatus-scene"
       style={{
-        background: `linear-gradient(180deg, ${apparatus.colorFrom}33, ${apparatus.colorTo}55)`,
+        background: is3D
+          ? "transparent"
+          : `linear-gradient(180deg, ${apparatus.colorFrom}33, ${apparatus.colorTo}55)`,
       }}
     >
       <header className="apparatus-scene__hud">

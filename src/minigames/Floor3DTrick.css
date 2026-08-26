@@ -1,0 +1,11 @@
+/* While the 3D animation plays, keep the UI out of the way — spec is
+   explicit that nothing should obscure Penelope performing the trick. */
+.floor3d__watching {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.55);
+  padding: var(--space-1) var(--space-3);
+  font-size: 1.4rem;
+}

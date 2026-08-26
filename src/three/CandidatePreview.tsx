@@ -7,7 +7,17 @@ import * as THREE from "three";
 // NOT part of the shipped game. Gated behind ?candidate-preview. Loads
 // public/candidate-preview/<file> and frames it so we can actually see the
 // asset's real quality instead of guessing from marketplace text.
-function Loader({ file }: { file: string }) {
+function Loader({
+  file,
+  angleDeg,
+  zoom,
+  pose,
+}: {
+  file: string;
+  angleDeg: number;
+  zoom: string | null;
+  pose: string | null;
+}) {
   const { scene, camera } = useThree();
   const loaded = useRef(false);
 
@@ -20,11 +30,30 @@ function Loader({ file }: { file: string }) {
       const size = box.getSize(new THREE.Vector3());
       gltf.scene.position.sub(center);
       scene.add(gltf.scene);
-      const dist = Math.max(size.x, size.y, size.z) * 1.6;
-      camera.position.set(0, size.y * 0.15, dist);
-      camera.lookAt(0, size.y * 0.15, 0);
+
+      if (pose === "cartwheel-mid") {
+        // Rough sanity pose test — NOT the real retargeted animation, just
+        // proof the skeleton deforms this mesh sensibly: raise both arms
+        // overhead, spread legs, tip the spine, so we can see whether skin
+        // weights hold up under a big pose instead of tearing/collapsing.
+        const bone = (n: string) => gltf.scene.getObjectByName(n);
+        bone("L_Upperarm")?.rotation.set(0, 0, -2.6);
+        bone("R_Upperarm")?.rotation.set(0, 0, 2.6);
+        bone("L_Thigh")?.rotation.set(0, 0, 0.9);
+        bone("R_Thigh")?.rotation.set(0, 0, -0.9);
+        bone("Spine01")?.rotation.set(1.1, 0, 0);
+        bone("Spine02")?.rotation.set(0.6, 0, 0);
+        bone("Head")?.rotation.set(-0.8, 0, 0);
+      }
+
+      const rad = (angleDeg * Math.PI) / 180;
+      const isFace = zoom === "face";
+      const dist = (isFace ? size.y * 0.5 : Math.max(size.x, size.y, size.z)) * 1.6;
+      const heightTarget = isFace ? size.y * 0.42 : size.y * 0.15;
+      camera.position.set(Math.sin(rad) * dist, heightTarget, Math.cos(rad) * dist);
+      camera.lookAt(0, heightTarget, 0);
     });
-  }, [file, scene, camera]);
+  }, [file, angleDeg, zoom, pose, scene, camera]);
 
   return null;
 }
@@ -32,6 +61,9 @@ function Loader({ file }: { file: string }) {
 export function CandidatePreview() {
   const params = new URLSearchParams(window.location.search);
   const file = params.get("file") ?? "rpm-half-body.glb";
+  const angleDeg = Number(params.get("angle") ?? "0");
+  const zoom = params.get("zoom");
+  const pose = params.get("pose");
   return (
     <div style={{ position: "fixed", inset: 0 }}>
       <Canvas shadows camera={{ position: [0, 0.3, 1.2], fov: 35 }}>
@@ -39,7 +71,7 @@ export function CandidatePreview() {
         <ambientLight intensity={0.7} />
         <directionalLight position={[2, 3, 2]} intensity={1.4} castShadow />
         <hemisphereLight args={["#fff", "#ccc", 0.4]} />
-        <Loader file={file} />
+        <Loader file={file} angleDeg={angleDeg} zoom={zoom} pose={pose} />
       </Canvas>
     </div>
   );

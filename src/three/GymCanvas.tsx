@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { PenelopeRig } from "./character/PenelopeRig";
+import { GltfPenelopeRig } from "./character/GltfPenelopeRig";
+import { CANDIDATE_A_BONE_MAP } from "./character/gltfBoneMap";
 import { useCharacterRig } from "./character/useCharacterRig";
 import { usePlayTrick } from "./animation/usePlayTrick";
 import { GymEnvironment } from "./scenes/GymEnvironment";
@@ -14,6 +16,13 @@ import { TRICKS } from "./animation/tricks";
 const PENELOPE_HAIR = "#9c6b3e";
 const PENELOPE_SKIN = "#f4c9a0";
 const CARTWHEEL_END_POSITION: [number, number, number] = [0.34, 1.1, 0.4];
+
+// Validation-only escape hatch (?candidate-rig=a) for evaluating a rigged
+// GLB character candidate inside the real game — camera, gym, trick
+// system untouched. Procedural PenelopeRig stays the default; nothing
+// here changes what a normal player sees. See gltfBoneMap.ts.
+const CANDIDATE_RIG =
+  typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("candidate-rig") : null;
 
 function PenelopeSceneActor() {
   const rig = useCharacterRig();
@@ -45,7 +54,16 @@ function PenelopeSceneActor() {
 
   return (
     <>
-      <PenelopeRig rig={rig} leotard={leotard} hairColor={PENELOPE_HAIR} skinTone={PENELOPE_SKIN} />
+      {CANDIDATE_RIG === "a" ? (
+        <GltfPenelopeRig
+          rig={rig}
+          url="/candidate-preview/candidate-a.glb"
+          boneMap={CANDIDATE_A_BONE_MAP}
+          facingYaw={Math.PI}
+        />
+      ) : (
+        <PenelopeRig rig={rig} leotard={leotard} hairColor={PENELOPE_HAIR} skinTone={PENELOPE_SKIN} />
+      )}
       <StarBurst3D triggerKey={burstKey} position={CARTWHEEL_END_POSITION} />
     </>
   );

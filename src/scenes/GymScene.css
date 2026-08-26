@@ -12,6 +12,15 @@
   pointer-events: none;
 }
 
+.gym-scene__penelope {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  transform: translateX(-50%);
+  width: min(38vw, 170px);
+  z-index: 2;
+}
+
 .gym-scene__hud,
 .gym-scene__hud * ,
 .apparatus-nav {

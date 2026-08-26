@@ -5,8 +5,8 @@ import { TrickPicker } from "./shared/TrickPicker";
 import { TapTarget } from "./shared/TapTarget";
 import { ResultPanel } from "./shared/ResultPanel";
 import { SpiderCartwheelSequence } from "./SpiderCartwheelSequence";
-import { Floor3DTrick } from "./Floor3DTrick";
-import { TRICKS as TRICKS_3D } from "../three/animation/tricks";
+import { Floor2DTrick } from "./Floor2DTrick";
+import { TRICKS_2D } from "../characters/gymnast2d/tricks";
 import { BigButton } from "../components/ui/BigButton";
 import { summarizeAttempt, type PerformanceTier } from "../utils/scoring";
 import "./shared/minigame.css";
@@ -72,8 +72,8 @@ export function FloorMinigame() {
         <div className="minigame__stage">
           <SpiderCartwheelSequence />
         </div>
-      ) : TRICKS_3D[trickId] ? (
-        <Floor3DTrick key={trickId} trickId={trickId} />
+      ) : TRICKS_2D[trickId] ? (
+        <Floor2DTrick key={trickId} trickId={trickId} />
       ) : (
         <div className="minigame__stage">
           {phase === "ready" && (

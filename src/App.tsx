@@ -17,10 +17,7 @@ import type { ApparatusId } from "./data/types";
 // screen's first paint doesn't wait on a 3D engine nothing shows yet.
 const GymCanvas = lazy(() => import("./three/GymCanvas"));
 const SmokeTest = lazy(() => import("./three/SmokeTest").then((m) => ({ default: m.SmokeTest })));
-const RigTest = lazy(() => import("./three/RigTest").then((m) => ({ default: m.RigTest })));
-const AnimFrameTest = lazy(() =>
-  import("./three/AnimFrameTest").then((m) => ({ default: m.AnimFrameTest })),
-);
+const FigurePreview = lazy(() => import("./characters/gymnast2d/FigurePreview"));
 
 // Scenes calm enough for the soft background loop; minigames stay quiet
 // so it never competes with trick SFX/cheers.
@@ -87,20 +84,11 @@ function App() {
       </div>
     );
   }
-  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("rig-test")) {
+  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("figure-preview")) {
     return (
       <div className="app-root">
         <Suspense fallback={null}>
-          <RigTest />
-        </Suspense>
-      </div>
-    );
-  }
-  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("anim-frame")) {
-    return (
-      <div className="app-root">
-        <Suspense fallback={null}>
-          <AnimFrameTest />
+          <FigurePreview />
         </Suspense>
       </div>
     );

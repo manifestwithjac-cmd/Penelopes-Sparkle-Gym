@@ -7,7 +7,7 @@
   },
   "overrides": [
     {
-      "files": ["src/three/**"],
+      "files": ["src/three/**", "src/characters/gymnast2d/**"],
       "rules": {
         "react/refs": "off",
         "react/purity": "off"

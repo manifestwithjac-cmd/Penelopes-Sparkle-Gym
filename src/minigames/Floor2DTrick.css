@@ -1,0 +1,30 @@
+/* The rigged figure needs room to fling her arms/legs wide mid-cartwheel
+   — override minigame.css's overflow: hidden so she never gets clipped. */
+.floor2d__stage {
+  overflow: visible;
+}
+
+.floor2d__figure {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.floor2d__figure svg {
+  width: min(60vw, 260px);
+  height: auto;
+}
+
+/* .floor2d__figure is position: absolute, which always paints above plain
+   static-flow siblings regardless of DOM order — give the prompt/result
+   panel a stacking context of their own (position: relative, no offset,
+   so layout is unaffected) so their later DOM order lets them paint on
+   top of her instead of being hidden underneath. TapTarget is already
+   position: absolute and later in the DOM, so it needs no extra rule. */
+.floor2d__stage > .minigame__prompt,
+.floor2d__stage > .result-panel {
+  position: relative;
+}

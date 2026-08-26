@@ -67,7 +67,7 @@ function PenelopeSceneActor() {
           rig={rig}
           url="/candidate-preview/c-clean/StylizedGirl-clean.glb"
           boneMap={CANDIDATE_C_GLB_BONE_MAP}
-          hipBoneName="mixamorig:Hips"
+          hipBoneName="mixamorigHips"
         />
       ) : (
         <PenelopeRig rig={rig} leotard={leotard} hairColor={PENELOPE_HAIR} skinTone={PENELOPE_SKIN} />

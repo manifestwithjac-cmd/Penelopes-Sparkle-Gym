@@ -4,6 +4,9 @@ import { TitleScreen } from "./scenes/TitleScreen";
 import { GymScene } from "./scenes/GymScene";
 import { ApparatusScene } from "./scenes/ApparatusScene";
 import { ShopScene } from "./scenes/ShopScene";
+import { SnackBarScene } from "./scenes/SnackBarScene";
+import { LoungeScene } from "./scenes/LoungeScene";
+import { TrophyScene } from "./scenes/TrophyScene";
 import { CelebrationToast } from "./effects/CelebrationToast";
 import type { ApparatusId } from "./data/types";
 
@@ -23,6 +26,9 @@ function App() {
         <ApparatusScene apparatusId={scene.slice("apparatus:".length) as ApparatusId} />
       )}
       {scene === "shop" && <ShopScene />}
+      {scene === "snackbar" && <SnackBarScene />}
+      {scene === "lounge" && <LoungeScene />}
+      {scene === "trophies" && <TrophyScene />}
       <CelebrationToast />
     </div>
   );

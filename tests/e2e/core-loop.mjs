@@ -11,18 +11,31 @@ const BASE_URL = process.env.BASE_URL || "http://localhost:5173";
 const CHROME_PATH =
   process.env.CHROME_PATH || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 
+// One browser for the whole run (not one per test) — this sandbox doesn't
+// have the resources to launch+close chromium six times in a row reliably,
+// and a fresh context per test still gives full isolation (own
+// localStorage, no shared state) without the relaunch cost.
+let sharedBrowser;
+async function getBrowser() {
+  if (!sharedBrowser) {
+    sharedBrowser = await chromium.launch({
+      executablePath: CHROME_PATH,
+      args: ["--no-sandbox", "--disable-dev-shm-usage"],
+    });
+  }
+  return sharedBrowser;
+}
+
 async function withPage(fn) {
-  const browser = await chromium.launch({
-    executablePath: CHROME_PATH,
-    args: ["--no-sandbox", "--disable-dev-shm-usage"],
-  });
+  const browser = await getBrowser();
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   try {
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
     const pageErrors = [];
     page.on("pageerror", (err) => pageErrors.push(err.message));
     await fn(page, pageErrors);
   } finally {
-    await browser.close();
+    await context.close();
   }
 }
 
@@ -192,12 +205,45 @@ async function testFriendInteraction() {
   });
 }
 
+async function testWorldFeatures() {
+  await withPage(async (page, pageErrors) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    await page.getByText("PLAY", { exact: false }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+
+    // The "67" wall easter egg (spec §4) should be present somewhere in
+    // the gym, unexplained, no objective attached.
+    const wallNumberText = await page.locator(".gym-decor__wall-number").innerText();
+    assert.equal(wallNumberText, "67", "the 67 easter egg is on a gym wall");
+
+    await page.getByText("Snack Bar", { exact: true }).click();
+    await page.locator(".snackbar-scene").waitFor({ timeout: 3000 });
+    await page.evaluate(() => {
+      [...document.querySelectorAll(".snackbar-scene__snack")]
+        .find((b) => b.textContent.includes("Cheetos"))
+        .click();
+    });
+    await page.locator(".snackbar-scene__bubble").waitFor({ timeout: 3000 });
+    await page.getByText("Gym", { exact: true }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+
+    await page.getByText("Friends Lounge", { exact: true }).click();
+    await page.locator(".lounge-scene").waitFor({ timeout: 3000 });
+    await page.getByText("See Achievements", { exact: false }).click();
+    await page.locator(".trophy-scene").waitFor({ timeout: 3000 });
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: snack bar, lounge, trophy wall, and the 67 easter egg all work");
+  });
+}
+
 const tests = [
   testCoreLoop,
   testReturningPlayer,
   testAllApparatusReachable,
   testShopEquipsLeotard,
   testFriendInteraction,
+  testWorldFeatures,
 ];
 let failed = false;
 for (const t of tests) {
@@ -209,4 +255,5 @@ for (const t of tests) {
     console.error(err);
   }
 }
+if (sharedBrowser) await sharedBrowser.close();
 process.exit(failed ? 1 : 0);

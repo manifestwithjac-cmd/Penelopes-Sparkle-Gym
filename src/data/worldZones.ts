@@ -30,7 +30,7 @@ export const WORLD_ZONES: WorldZoneDef[] = [
     worldPosition: 0.4,
     colorFrom: "#e6d6ff",
     colorTo: "#cfaeff",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "snackbar",
@@ -39,6 +39,6 @@ export const WORLD_ZONES: WorldZoneDef[] = [
     worldPosition: 0.6,
     colorFrom: "#ffe08a",
     colorTo: "#ffcd3c",
-    enabled: false,
+    enabled: true,
   },
 ];

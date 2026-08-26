@@ -18,7 +18,8 @@ export type SceneId =
   | "apparatus:vault"
   | "shop"
   | "snackbar"
-  | "lounge";
+  | "lounge"
+  | "trophies";
 
 export interface CelebrationEvent {
   id: string;

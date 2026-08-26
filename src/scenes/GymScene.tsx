@@ -61,9 +61,14 @@ export function GymScene() {
           <div className="gym-decor__banner" style={{ left: "16%" }}>
             SPARKLE GYM
           </div>
-          <div className="gym-decor__trophy-shelf" style={{ left: "48%" }} aria-hidden="true">
+          <button
+            className="gym-decor__trophy-shelf"
+            style={{ left: "48%" }}
+            onClick={() => goToScene("trophies")}
+            aria-label="Trophy Wall"
+          >
             🏆 🏆 🏆
-          </div>
+          </button>
           <div className="gym-decor__wall-number" style={{ left: "78%" }} aria-hidden="true">
             67
           </div>

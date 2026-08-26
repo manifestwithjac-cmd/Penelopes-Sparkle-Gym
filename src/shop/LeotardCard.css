@@ -1,0 +1,72 @@
+.leotard-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-soft);
+  border: 3px solid transparent;
+  min-height: var(--tap-comfortable);
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.leotard-card:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.leotard-card--equipped {
+  border-color: var(--pink-400);
+  background: var(--pink-50);
+}
+
+.leotard-card--locked {
+  opacity: 0.65;
+}
+
+.leotard-card__figure {
+  width: clamp(64px, 18vw, 96px);
+  height: clamp(90px, 25vw, 130px);
+}
+
+.leotard-card--locked .leotard-card__figure {
+  filter: grayscale(0.85);
+}
+
+/* Freeze the idle bob for grid browsing — 19 simultaneously-bobbing
+   figures adds visual noise without helping a child pick a leotard, and
+   a static target is easier to tap precisely. */
+.leotard-card__figure .pose-idle {
+  animation: none;
+}
+
+.leotard-card__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.leotard-card__lock {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-text-soft);
+  text-align: center;
+}
+
+.leotard-card__badge {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  background: var(--gold-400);
+  color: var(--ink);
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--radius-round);
+  box-shadow: var(--shadow-soft);
+  white-space: nowrap;
+}

@@ -3,6 +3,7 @@ import { useGameStore } from "./state/gameStore";
 import { TitleScreen } from "./scenes/TitleScreen";
 import { GymScene } from "./scenes/GymScene";
 import { ApparatusScene } from "./scenes/ApparatusScene";
+import { ShopScene } from "./scenes/ShopScene";
 import { CelebrationToast } from "./effects/CelebrationToast";
 import type { ApparatusId } from "./data/types";
 
@@ -21,6 +22,7 @@ function App() {
       {scene.startsWith("apparatus:") && (
         <ApparatusScene apparatusId={scene.slice("apparatus:".length) as ApparatusId} />
       )}
+      {scene === "shop" && <ShopScene />}
       <CelebrationToast />
     </div>
   );

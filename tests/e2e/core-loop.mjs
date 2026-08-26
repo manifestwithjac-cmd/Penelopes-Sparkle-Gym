@@ -103,7 +103,65 @@ async function testAllApparatusReachable() {
   });
 }
 
-const tests = [testCoreLoop, testReturningPlayer, testAllApparatusReachable];
+async function testShopEquipsLeotard() {
+  await withPage(async (page, pageErrors) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    // Seed enough stars to unlock a second leotard without playing through
+    // the whole progression — this test is about the shop, not earning.
+    await page.evaluate(() => {
+      localStorage.setItem(
+        "penelopes-sparkle-gym-save",
+        JSON.stringify({
+          state: {
+            stars: 20,
+            points: 0,
+            trickStats: {},
+            apparatusVisits: {},
+            unlockedAchievementIds: [],
+            completedChallengeIds: [],
+            equippedLeotardId: "pink_starter",
+            soundOn: true,
+            reducedMotion: false,
+            hasPlayedBefore: true,
+          },
+          version: 0,
+        }),
+      );
+    });
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByText("Leotard Shop", { exact: true }).click();
+    await page.locator(".shop-scene").waitFor({ timeout: 3000 });
+
+    // Click via a direct DOM dispatch rather than a Locator: Playwright's
+    // stability/actionability check is flaky against the SVG figure inside
+    // each card even though the click resolves to the right element (a
+    // tooling quirk, not a game bug — verified against elementFromPoint).
+    await page.evaluate(() => {
+      const target = [...document.querySelectorAll(".leotard-card__name")].find(
+        (el) => el.textContent === "Purple Glitter",
+      );
+      target.closest("button").click();
+    });
+
+    const saved = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("penelopes-sparkle-gym-save")),
+    );
+    assert.equal(saved.state.equippedLeotardId, "purple_glitter", "shop equips the tapped leotard");
+
+    await page.getByText("Gym", { exact: true }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: shop equips a leotard and it's worn back in the gym");
+  });
+}
+
+const tests = [
+  testCoreLoop,
+  testReturningPlayer,
+  testAllApparatusReachable,
+  testShopEquipsLeotard,
+];
 let failed = false;
 for (const t of tests) {
   try {

@@ -21,7 +21,7 @@ export const WORLD_ZONES: WorldZoneDef[] = [
     worldPosition: 0.2,
     colorFrom: "#ffd9ec",
     colorTo: "#ff8cc6",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "lounge",

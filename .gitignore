@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Third-party candidate assets for the character-redesign evaluation
+# harness (src/three/CandidatePreview.tsx) — never commit these.
+public/candidate-preview/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

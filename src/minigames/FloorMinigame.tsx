@@ -7,6 +7,7 @@ import { ResultPanel } from "./shared/ResultPanel";
 import { BigButton } from "../components/ui/BigButton";
 import { summarizeAttempt, type PerformanceTier } from "../utils/scoring";
 import "./shared/minigame.css";
+import "./FloorMinigame.css";
 
 const STEP_COUNT = 3;
 const STEP_DURATION_MS = 1300;
@@ -75,13 +76,16 @@ export function FloorMinigame() {
         )}
 
         {phase === "playing" && (
-          <TapTarget
-            spawnKey={stepIndex}
-            durationMs={STEP_DURATION_MS}
-            x={spot.x}
-            y={spot.y}
-            onResolve={handleStepResolved}
-          />
+          <div className={trickId === "helicopter_cartwheel" ? "floor-stage--helicopter" : ""}>
+            <TapTarget
+              spawnKey={stepIndex}
+              durationMs={STEP_DURATION_MS}
+              glyph={trick?.icon}
+              x={spot.x}
+              y={spot.y}
+              onResolve={handleStepResolved}
+            />
+          </div>
         )}
 
         {phase === "result" && outcome && (

@@ -1,0 +1,34 @@
+/* Helicopter Cartwheel gets its own spinning-blades backdrop so it reads
+   as visually distinct from every other floor trick (spec §12). */
+.floor-stage--helicopter::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(70vw, 320px);
+  height: min(70vw, 320px);
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(
+    var(--sky-300) 0deg 20deg,
+    transparent 20deg 45deg
+  );
+  border-radius: 50%;
+  opacity: 0.35;
+  animation: helicopterSpin 1.1s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes helicopterSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floor-stage--helicopter::before {
+    animation: none;
+  }
+}

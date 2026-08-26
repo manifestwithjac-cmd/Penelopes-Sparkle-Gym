@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGameStore } from "../state/gameStore";
+import { TRICKS_BY_ID } from "../data/tricks";
 import { TrickPicker } from "./shared/TrickPicker";
 import { MovingIndicator } from "./shared/MovingIndicator";
 import { ResultPanel } from "./shared/ResultPanel";
@@ -50,6 +51,8 @@ export function BeamMinigame() {
     }
   }
 
+  const trick = TRICKS_BY_ID[trickId];
+
   return (
     <div className="minigame">
       <TrickPicker apparatusId="beam" selectedTrickId={trickId} onSelect={setTrickId} />
@@ -71,7 +74,7 @@ export function BeamMinigame() {
             axis="x"
             sweetCenter={0.5}
             tapLabel="TAP!"
-            glyph="🤸"
+            glyph={trick?.icon}
             onResolve={handleStepResolved}
           />
         )}

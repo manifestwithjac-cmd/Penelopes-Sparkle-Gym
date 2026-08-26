@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Box3, Group, Vector3, type Bone, type Object3D } from "three";
 import type { RigRefs } from "./useCharacterRig";
 import { createBoneProxy } from "./boneProxy";
@@ -46,6 +46,17 @@ interface GltfPenelopeRigProps {
    * skeleton's own leg length (now scaled to roughly match ours) carries
    * the feet down toward the floor, same as the procedural rig. */
   hipBoneName?: string;
+  /** Optional pre-fetched GLB bytes — when set, skips GLTFLoader's own
+   * network fetch of `url` entirely and parses this buffer instead.
+   * Exists for embedding a candidate directly in a self-contained preview
+   * page (see the mobile-preview debugging in this project's history): a
+   * sandboxed viewer refused to fetch() a blob: URL at all ("Load
+   * failed"), even though the exact same bytes were already sitting in
+   * memory from decoding a base64 payload — so the fix is to hand
+   * GLTFLoader those bytes directly via .parse() and never ask it to
+   * fetch anything. `url` is still required as GLTFLoader.parse()'s path
+   * argument (used only to resolve any relative resource references). */
+  arrayBuffer?: ArrayBuffer;
 }
 
 /**
@@ -55,7 +66,14 @@ interface GltfPenelopeRigProps {
  * "point the ref at the bone") so usePlayTrick/poseUtils drive it with
  * zero changes — same keyframe data, same call sites.
  */
-export function GltfPenelopeRig({ rig, url, boneMap, facingYaw = 0, hipBoneName = "Hip" }: GltfPenelopeRigProps) {
+export function GltfPenelopeRig({
+  rig,
+  url,
+  boneMap,
+  facingYaw = 0,
+  hipBoneName = "Hip",
+  arrayBuffer,
+}: GltfPenelopeRigProps) {
   const mountRef = useRef<Group>(null);
   const [scene, setScene] = useState<Object3D | null>(null);
 
@@ -65,55 +83,59 @@ export function GltfPenelopeRig({ rig, url, boneMap, facingYaw = 0, hipBoneName 
 
   useEffect(() => {
     let cancelled = false;
-    new GLTFLoader().load(
-      url,
-      (gltf) => {
-        if (cancelled) return;
-        try {
-          gltf.scene.rotation.y = facingYaw;
-          const box = new Box3().setFromObject(gltf.scene);
-          const size = box.getSize(new Vector3());
-          const center = box.getCenter(new Vector3());
-          if (!isFinite(size.x) || !isFinite(size.y) || !isFinite(size.z)) {
-            throw new Error(`non-finite bounding box: ${JSON.stringify(size)}`);
-          }
-          const scale = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
-          gltf.scene.scale.setScalar(scale);
-          gltf.scene.position.x -= center.x * scale;
-          gltf.scene.position.z -= center.z * scale;
 
-          gltf.scene.updateMatrixWorld(true);
-          const hipBone = gltf.scene.getObjectByName(hipBoneName);
-          if (!hipBone) {
-            showLoadError(url, `hip bone "${hipBoneName}" not found in loaded scene`);
-          }
-          const hipWorldY = hipBone ? hipBone.getWorldPosition(new Vector3()).y : 0;
-          gltf.scene.position.y -= hipWorldY;
-
-          let mappedBones = 0;
-          for (const [joint, boneName] of Object.entries(boneMap)) {
-            const bone = gltf.scene.getObjectByName(boneName as string) as Bone | undefined;
-            if (bone) {
-              rig[joint as keyof RigRefs].current = createBoneProxy(bone);
-              mappedBones++;
-            }
-          }
-          if (mappedBones === 0) {
-            showLoadError(url, "none of boneMap's bone names were found in the loaded scene");
-          }
-          setScene(gltf.scene);
-        } catch (err) {
-          showLoadError(`${url} (post-load processing)`, err);
+    const onLoad = (gltf: GLTF) => {
+      if (cancelled) return;
+      try {
+        gltf.scene.rotation.y = facingYaw;
+        const box = new Box3().setFromObject(gltf.scene);
+        const size = box.getSize(new Vector3());
+        const center = box.getCenter(new Vector3());
+        if (!isFinite(size.x) || !isFinite(size.y) || !isFinite(size.z)) {
+          throw new Error(`non-finite bounding box: ${JSON.stringify(size)}`);
         }
-      },
-      undefined,
-      (err) => showLoadError(`${url} (load failed)`, err),
-    );
+        const scale = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
+        gltf.scene.scale.setScalar(scale);
+        gltf.scene.position.x -= center.x * scale;
+        gltf.scene.position.z -= center.z * scale;
+
+        gltf.scene.updateMatrixWorld(true);
+        const hipBone = gltf.scene.getObjectByName(hipBoneName);
+        if (!hipBone) {
+          showLoadError(url, `hip bone "${hipBoneName}" not found in loaded scene`);
+        }
+        const hipWorldY = hipBone ? hipBone.getWorldPosition(new Vector3()).y : 0;
+        gltf.scene.position.y -= hipWorldY;
+
+        let mappedBones = 0;
+        for (const [joint, boneName] of Object.entries(boneMap)) {
+          const bone = gltf.scene.getObjectByName(boneName as string) as Bone | undefined;
+          if (bone) {
+            rig[joint as keyof RigRefs].current = createBoneProxy(bone);
+            mappedBones++;
+          }
+        }
+        if (mappedBones === 0) {
+          showLoadError(url, "none of boneMap's bone names were found in the loaded scene");
+        }
+        setScene(gltf.scene);
+      } catch (err) {
+        showLoadError(`${url} (post-load processing)`, err);
+      }
+    };
+    const onError = (err: unknown) => showLoadError(`${url} (load failed)`, err);
+
+    const loader = new GLTFLoader();
+    if (arrayBuffer) {
+      loader.parse(arrayBuffer, url, onLoad, onError);
+    } else {
+      loader.load(url, onLoad, undefined, onError);
+    }
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url]);
+  }, [url, arrayBuffer]);
 
   return (
     <group ref={mountRef} position={[0, 0, 0]}>

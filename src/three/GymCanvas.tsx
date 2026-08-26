@@ -68,6 +68,10 @@ function PenelopeSceneActor() {
           url="/candidate-preview/c-clean/StylizedGirl-clean.glb"
           boneMap={CANDIDATE_C_GLB_BONE_MAP}
           hipBoneName="mixamorigHips"
+          // Set only by a self-contained single-page preview build (see
+          // GltfPenelopeRig.tsx) that embeds the GLB bytes directly rather
+          // than serving this file over HTTP — never set in the real game.
+          arrayBuffer={(window as unknown as { __CANDIDATE_C_ARRAY_BUFFER?: ArrayBuffer }).__CANDIDATE_C_ARRAY_BUFFER}
         />
       ) : (
         <PenelopeRig rig={rig} leotard={leotard} hairColor={PENELOPE_HAIR} skinTone={PENELOPE_SKIN} />

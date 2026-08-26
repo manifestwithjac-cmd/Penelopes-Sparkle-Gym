@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGameStore } from "../state/gameStore";
 import { Penelope } from "../characters/Penelope";
 import { TapTarget } from "./shared/TapTarget";
@@ -6,7 +6,8 @@ import { ResultPanel } from "./shared/ResultPanel";
 import { StarBurst } from "../effects/StarBurst";
 import { SpiderwebBurst } from "../effects/SpiderwebBurst";
 import { BigButton } from "../components/ui/BigButton";
-import { summarizeAttempt, type PerformanceTier } from "../utils/scoring";
+import { useSound } from "../audio/useSound";
+import { summarizeAttempt, TIER_LABEL, randomEncouragement, type PerformanceTier } from "../utils/scoring";
 import "./SpiderCartwheelSequence.css";
 
 const STAGES = [
@@ -30,6 +31,7 @@ type Phase = "intro" | "stage" | "finale" | "result";
  */
 export function SpiderCartwheelSequence() {
   const recordTrickResult = useGameStore((s) => s.recordTrickResult);
+  const playSound = useSound();
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [stageIndex, setStageIndex] = useState(0);
@@ -41,6 +43,12 @@ export function SpiderCartwheelSequence() {
     starsGained: number;
     pointsGained: number;
   } | null>(null);
+
+  useEffect(() => {
+    if (phase !== "finale" || !outcome) return;
+    playSound(outcome.tier === "try" ? "landing" : "spiderSpecial");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   function start() {
     setAccuracies([]);
@@ -87,16 +95,22 @@ export function SpiderCartwheelSequence() {
 
       {(phase === "stage" || phase === "finale") && (
         <div className="spider-sequence__figure-area">
-          {phase === "finale" && (
+          {phase === "finale" && outcome && (
             <>
               <SpiderwebBurst />
-              <StarBurst triggerKey="spider-finale" count={26} big />
+              {outcome.tier !== "try" && (
+                <StarBurst triggerKey="spider-finale" count={26} big />
+              )}
             </>
           )}
           <div key={animKey} className={`spider-sequence__penelope ${animClass}`}>
-            <Penelope pose={phase === "finale" ? "celebrate" : "idle"} />
+            <Penelope pose={phase === "finale" ? (outcome?.tier === "try" ? "wobble" : "celebrate") : "idle"} />
           </div>
-          {phase === "finale" && <p className="spider-sequence__finale-label">SPARKLE PERFECT!</p>}
+          {phase === "finale" && outcome && (
+            <p className="spider-sequence__finale-label">
+              {outcome.tier === "try" ? randomEncouragement() : TIER_LABEL[outcome.tier]}
+            </p>
+          )}
         </div>
       )}
 

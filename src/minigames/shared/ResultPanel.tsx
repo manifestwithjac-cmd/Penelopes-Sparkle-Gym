@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { TIER_LABEL, randomEncouragement, type PerformanceTier } from "../../utils/scoring";
 import { Penelope } from "../../characters/Penelope";
 import { StarBurst } from "../../effects/StarBurst";
 import { BigButton } from "../../components/ui/BigButton";
+import { useSound } from "../../audio/useSound";
 import "./ResultPanel.css";
 
 interface ResultPanelProps {
@@ -16,6 +18,18 @@ interface ResultPanelProps {
  * (spec §15: never a harsh "failed" state). */
 export function ResultPanel({ tier, starsGained, pointsGained, onRetry }: ResultPanelProps) {
   const success = tier !== "try";
+  const playSound = useSound();
+
+  useEffect(() => {
+    if (!success) {
+      playSound("tryAgain");
+    } else if (tier === "sparkle_perfect" || tier === "amazing") {
+      playSound("bigSuccessCheer");
+    } else {
+      playSound("successCheer");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="result-panel">

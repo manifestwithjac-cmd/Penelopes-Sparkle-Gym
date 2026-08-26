@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { computeTapAccuracy } from "./timing";
+import { useSound } from "../../audio/useSound";
 import "./TapTarget.css";
 
 interface TapTargetProps {
@@ -18,6 +19,7 @@ interface TapTargetProps {
 export function TapTarget({ spawnKey, durationMs, glyph = "★", onResolve, x, y }: TapTargetProps) {
   const spawnedAt = useRef(performance.now());
   const resolved = useRef(false);
+  const playSound = useSound();
 
   useEffect(() => {
     spawnedAt.current = performance.now();
@@ -35,6 +37,7 @@ export function TapTarget({ spawnKey, durationMs, glyph = "★", onResolve, x, y
   function handleTap() {
     if (resolved.current) return;
     resolved.current = true;
+    playSound("tap");
     const elapsed = performance.now() - spawnedAt.current;
     const fraction = Math.min(1, elapsed / durationMs);
     onResolve(computeTapAccuracy(fraction));

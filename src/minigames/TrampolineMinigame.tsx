@@ -72,6 +72,7 @@ export function TrampolineMinigame() {
             sweetCenter={0.88}
             tapLabel="BOUNCE!"
             glyph="🤸"
+            tapSound="trampolineBoing"
             onResolve={handleStepResolved}
           />
         )}

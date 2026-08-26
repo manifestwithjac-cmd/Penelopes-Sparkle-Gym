@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useGameStore } from "../state/gameStore";
 import { StarBurst } from "./StarBurst";
+import { useSound } from "../audio/useSound";
 import "./CelebrationToast.css";
 
 const AUTO_DISMISS_MS = 2200;
@@ -10,11 +11,14 @@ const AUTO_DISMISS_MS = 2200;
 export function CelebrationToast() {
   const celebration = useGameStore((s) => s.celebrationQueue[0]);
   const dismiss = useGameStore((s) => s.dismissCelebration);
+  const playSound = useSound();
 
   useEffect(() => {
     if (!celebration) return;
+    playSound("sparkle");
     const t = setTimeout(() => dismiss(celebration.id), AUTO_DISMISS_MS);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [celebration, dismiss]);
 
   if (!celebration) return null;

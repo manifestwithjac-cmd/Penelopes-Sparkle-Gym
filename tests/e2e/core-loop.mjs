@@ -237,11 +237,53 @@ async function testWorldFeatures() {
   });
 }
 
+async function testSoundToggleAndAudioPlayback() {
+  await withPage(async (page, pageErrors) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    await page.getByText("PLAY", { exact: false }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+
+    // The PLAY tap is a real user gesture — should have unlocked audio and
+    // started the background loop without throwing.
+    const soundOnInitially = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("penelopes-sparkle-gym-save")).state.soundOn,
+    );
+    assert.equal(soundOnInitially, true, "sound defaults on");
+
+    await page.evaluate(() => document.querySelector(".sound-toggle").click());
+    await page.waitForTimeout(150);
+    let soundOn = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("penelopes-sparkle-gym-save")).state.soundOn,
+    );
+    assert.equal(soundOn, false, "toggle turns sound off");
+
+    await page.evaluate(() => document.querySelector(".sound-toggle").click());
+    await page.waitForTimeout(150);
+    soundOn = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("penelopes-sparkle-gym-save")).state.soundOn,
+    );
+    assert.equal(soundOn, true, "toggle turns sound back on");
+
+    // Play a full trick with sound on — exercises tap/cheer/sparkle SFX.
+    await page.getByText("Floor", { exact: true }).first().click();
+    await page.locator(".apparatus-scene").waitFor({ timeout: 3000 });
+    await page.getByText("GO!", { exact: false }).click();
+    for (let i = 0; i < 3; i++) {
+      await page.locator(".tap-target").click({ timeout: 2000 }).catch(() => {});
+    }
+    await page.locator(".result-panel").waitFor({ timeout: 3000 });
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: sound toggle works and audio-triggering gameplay throws no errors");
+  });
+}
+
 const tests = [
   testCoreLoop,
   testReturningPlayer,
   testAllApparatusReachable,
   testShopEquipsLeotard,
+  testSoundToggleAndAudioPlayback,
   testFriendInteraction,
   testWorldFeatures,
 ];

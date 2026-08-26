@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { computeTapAccuracy } from "./timing";
 import { BigButton } from "../../components/ui/BigButton";
+import { useSound, type SoundName } from "../../audio/useSound";
 import "./MovingIndicator.css";
 
 export type IndicatorAxis = "x" | "y" | "rotate";
@@ -15,6 +16,7 @@ interface MovingIndicatorProps {
   glyph?: string;
   tapLabel: string;
   onResolve: (accuracy: number) => void;
+  tapSound?: SoundName;
 }
 
 /**
@@ -33,9 +35,11 @@ export function MovingIndicator({
   glyph = "⭐",
   tapLabel,
   onResolve,
+  tapSound = "tap",
 }: MovingIndicatorProps) {
   const spawnedAt = useRef(performance.now());
   const resolved = useRef(false);
+  const playSound = useSound();
 
   useEffect(() => {
     spawnedAt.current = performance.now();
@@ -53,6 +57,7 @@ export function MovingIndicator({
   function handleTap() {
     if (resolved.current) return;
     resolved.current = true;
+    playSound(tapSound);
     const elapsed = performance.now() - spawnedAt.current;
     const fraction = Math.min(1, elapsed / durationMs);
     onResolve(computeTapAccuracy(fraction, sweetCenter, sweetWidth));

@@ -65,6 +65,8 @@ export interface FriendDef {
   greetings: string[];
   cheerLines: string[];
   challengeLines: string[];
+  /** Position along the gym world track, 0..1 (see GymScene). */
+  worldPosition: number;
 }
 
 export type ChallengeGoal =

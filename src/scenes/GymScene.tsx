@@ -1,12 +1,15 @@
 import { useRef, useState } from "react";
 import { APPARATUS } from "../data/apparatus";
 import { WORLD_ZONES } from "../data/worldZones";
+import { FRIENDS } from "../data/friends";
 import type { ApparatusId } from "../data/types";
 import { useGameStore, type SceneId } from "../state/gameStore";
 import { Penelope } from "../characters/Penelope";
 import { StarCounter, PointCounter } from "../components/ui/Counters";
 import { SoundToggle } from "../components/ui/SoundToggle";
 import { ApparatusNavBar } from "../components/nav/ApparatusNavBar";
+import { FriendSprite } from "../friends/FriendSprite";
+import { FriendPopup } from "../friends/FriendPopup";
 import "./GymScene.css";
 
 const WALK_MS = 550;
@@ -14,6 +17,7 @@ const WALK_MS = 550;
 export function GymScene() {
   const goToScene = useGameStore((s) => s.goToScene);
   const [penelopePos, setPenelopePos] = useState(0.1);
+  const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const walkTimeout = useRef<number | null>(null);
 
@@ -108,6 +112,15 @@ export function GymScene() {
             </button>
           ))}
 
+          {FRIENDS.map((friend) => (
+            <FriendSprite
+              key={friend.id}
+              friend={friend}
+              style={{ left: `${friend.worldPosition * 100}%`, top: "56%" }}
+              onTap={() => setSelectedFriendId(friend.id)}
+            />
+          ))}
+
           <div
             className="gym-scene__penelope"
             style={{ left: `${penelopePos * 100}%`, transitionDuration: `${WALK_MS}ms` }}
@@ -118,6 +131,13 @@ export function GymScene() {
       </div>
 
       <ApparatusNavBar onSelect={goToApparatus} />
+
+      {selectedFriendId && (
+        <FriendPopup
+          friend={FRIENDS.find((f) => f.id === selectedFriendId)!}
+          onClose={() => setSelectedFriendId(null)}
+        />
+      )}
     </div>
   );
 }

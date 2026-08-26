@@ -13,6 +13,7 @@ export const FRIENDS: FriendDef[] = [
     greetings: ["Hi Penelope!", "Let's earn purple stars!"],
     cheerLines: ["Yay!! So sparkly!", "You're amazing!"],
     challengeLines: ["Earn 10 stars!", "Let's do the beam together!"],
+    worldPosition: 0.16,
   },
   {
     id: "isabella",
@@ -25,6 +26,7 @@ export const FRIENDS: FriendDef[] = [
     greetings: ["Hi Penelope!", "Let's do cartwheels!"],
     cheerLines: ["Woohoo!", "Cartwheel queen!"],
     challengeLines: ["Do 3 cartwheels!", "Try the floor with me!"],
+    worldPosition: 0.36,
   },
   {
     id: "sadie",
@@ -37,6 +39,7 @@ export const FRIENDS: FriendDef[] = [
     greetings: ["Hi Penelope!", "Somersault time!"],
     cheerLines: ["Roll with it!", "So good!"],
     challengeLines: ["Do a somersault!", "Try the trampoline!"],
+    worldPosition: 0.64,
   },
   {
     id: "other_penelope",
@@ -48,6 +51,7 @@ export const FRIENDS: FriendDef[] = [
     greetings: ["Hi! Two Penelopes!", "Let's practice!"],
     cheerLines: ["Twinning!", "Great job, Penelope!"],
     challengeLines: ["Try the beam!", "Earn 15 stars!"],
+    worldPosition: 0.84,
   },
 ];
 

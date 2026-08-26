@@ -156,11 +156,48 @@ async function testShopEquipsLeotard() {
   });
 }
 
+async function testFriendInteraction() {
+  await withPage(async (page, pageErrors) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    await page.getByText("PLAY", { exact: false }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+
+    await page.evaluate(() => {
+      const btn = [...document.querySelectorAll(".friend-sprite")].find(
+        (b) => b.getAttribute("aria-label") === "Isabella",
+      );
+      btn.click();
+    });
+    await page.locator(".friend-popup").waitFor({ timeout: 3000 });
+
+    // DOM-dispatched clicks, not Locator.click(): Playwright's actionability
+    // "stability" check flags these buttons as perpetually moving because
+    // of the animated SVG figures inside them, even though a real click
+    // (and elementFromPoint) resolves correctly — a tooling quirk against
+    // animated SVG children, not a game bug. See same note on the shop test.
+    await page.evaluate(() => {
+      [...document.querySelectorAll("button")]
+        .find((b) => b.textContent.includes("High Five"))
+        .click();
+    });
+    await page.waitForTimeout(200);
+
+    await page.evaluate(() => {
+      document.querySelector(".friend-popup__close").click();
+    });
+    await page.locator(".friend-popup").waitFor({ state: "hidden", timeout: 3000 });
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: tapping a friend opens dialogue and high-five works");
+  });
+}
+
 const tests = [
   testCoreLoop,
   testReturningPlayer,
   testAllApparatusReachable,
   testShopEquipsLeotard,
+  testFriendInteraction,
 ];
 let failed = false;
 for (const t of tests) {

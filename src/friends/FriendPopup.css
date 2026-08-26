@@ -1,0 +1,95 @@
+.friend-popup-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(90, 40, 110, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+}
+
+.friend-popup {
+  position: relative;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: min(90vw, 340px);
+  width: 100%;
+  animation: popupIn 300ms var(--ease-bounce);
+}
+
+@keyframes popupIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.friend-popup__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--pink-50);
+  font-size: 1.1rem;
+  color: var(--color-primary-strong);
+}
+
+.friend-popup__stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 100%;
+  height: clamp(120px, 30vw, 180px);
+}
+
+.friend-popup__figure {
+  width: clamp(70px, 20vw, 110px);
+  height: 100%;
+}
+
+.friend-popup__bubble {
+  background: var(--pink-50);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1rem, 4vw, 1.2rem);
+  color: var(--color-primary-strong);
+  text-align: center;
+}
+
+.friend-popup__challenge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--purple-50, #f6f0ff);
+  border-radius: var(--radius-round);
+  padding: var(--space-2) var(--space-4);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.friend-popup__reward {
+  color: var(--purple-600);
+  font-weight: 800;
+}
+
+.friend-popup__done {
+  font-weight: 700;
+  color: var(--color-success);
+}

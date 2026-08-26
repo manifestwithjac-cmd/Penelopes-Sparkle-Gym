@@ -1,0 +1,32 @@
+.friend-sprite {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  z-index: 3;
+}
+
+.friend-sprite__figure {
+  width: clamp(56px, 8vw, 90px);
+  height: clamp(78px, 11vw, 126px);
+  filter: drop-shadow(0 4px 4px rgba(120, 40, 130, 0.25));
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.friend-sprite:active .friend-sprite__figure {
+  transform: scale(0.92);
+}
+
+.friend-sprite__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.7rem;
+  color: var(--purple-600);
+  background: var(--white);
+  padding: 1px 8px;
+  border-radius: var(--radius-round);
+  box-shadow: var(--shadow-soft);
+  white-space: nowrap;
+}

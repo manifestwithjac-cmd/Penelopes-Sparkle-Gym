@@ -13,8 +13,20 @@ import type { RigTarget } from "./useCharacterRig";
 const tmpEuler = new Euler();
 const tmpQuat = new Quaternion();
 
-export function createBoneProxy(bone: Bone): RigTarget {
+/** Optional one-time correction (radians, XYZ Euler) baked into the
+ * captured bind quaternion before any per-frame delta is composed on top.
+ * Some candidate rigs bind in a T-pose (arms held horizontal) rather than
+ * the procedural rig's arms-down default our REST_POSE deltas were
+ * authored against — too big a gap for a small delta to close on its own.
+ * This lets a specific joint's effective "rest" be nudged toward
+ * arms-down once at load time, independent of the shared REST_POSE data
+ * every trick keyframe still resolves against. */
+export function createBoneProxy(bone: Bone, correction?: { x?: number; y?: number; z?: number }): RigTarget {
   const restQuat = bone.quaternion.clone();
+  if (correction) {
+    tmpEuler.set(correction.x ?? 0, correction.y ?? 0, correction.z ?? 0, "XYZ");
+    restQuat.multiply(tmpQuat.setFromEuler(tmpEuler));
+  }
   return {
     rotation: {
       set(x: number, y: number, z: number) {

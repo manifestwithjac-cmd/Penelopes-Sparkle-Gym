@@ -79,6 +79,24 @@ function Loader({
         // eslint-disable-next-line no-console
         console.log("OBJECT_NAMES", JSON.stringify(names));
       }
+      if (new URLSearchParams(window.location.search).has("list-materials")) {
+        const mats: { mesh: string; material: string; color: string | null }[] = [];
+        object.traverse((c) => {
+          if (c instanceof THREE.Mesh) {
+            const applyOne = (m: THREE.Material) => {
+              const color =
+                m instanceof THREE.MeshStandardMaterial || m instanceof THREE.MeshBasicMaterial
+                  ? `#${m.color.getHexString()}`
+                  : null;
+              mats.push({ mesh: c.name, material: m.name, color });
+            };
+            if (Array.isArray(c.material)) c.material.forEach(applyOne);
+            else applyOne(c.material);
+          }
+        });
+        // eslint-disable-next-line no-console
+        console.log("MATERIAL_COLORS", JSON.stringify(mats));
+      }
       const box = new THREE.Box3().setFromObject(object);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());

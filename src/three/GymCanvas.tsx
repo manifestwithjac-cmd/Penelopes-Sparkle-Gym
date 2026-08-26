@@ -65,9 +65,17 @@ function PenelopeSceneActor() {
       ) : CANDIDATE_RIG === "c" ? (
         <GltfPenelopeRig
           rig={rig}
-          url="/candidate-preview/c-clean/StylizedGirl-clean.glb"
+          url="/candidate-preview/c-colored/StylizedGirl-colored.glb"
           boneMap={CANDIDATE_C_GLB_BONE_MAP}
           hipBoneName="mixamorigHips"
+          // Candidate C's skeleton binds in a T-pose (arms held out
+          // horizontally) rather than our procedural rig's arms-down
+          // default that REST_POSE's small shoulder deltas were authored
+          // against — bring the bind pose itself down to sides first.
+          restCorrections={{
+            shoulderL: { x: 1.4 },
+            shoulderR: { x: 1.4 },
+          }}
           // Set only by a self-contained single-page preview build (see
           // GltfPenelopeRig.tsx) that embeds the GLB bytes directly rather
           // than serving this file over HTTP — never set in the real game.

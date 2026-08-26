@@ -57,6 +57,9 @@ interface GltfPenelopeRigProps {
    * fetch anything. `url` is still required as GLTFLoader.parse()'s path
    * argument (used only to resolve any relative resource references). */
   arrayBuffer?: ArrayBuffer;
+  /** Per-joint one-time bind-pose correction (see boneProxy.ts) — for a
+   * candidate whose skeleton binds in a T-pose rather than arms-down. */
+  restCorrections?: Partial<Record<keyof RigRefs, { x?: number; y?: number; z?: number }>>;
 }
 
 /**
@@ -73,6 +76,7 @@ export function GltfPenelopeRig({
   facingYaw = 0,
   hipBoneName = "Hip",
   arrayBuffer,
+  restCorrections,
 }: GltfPenelopeRigProps) {
   const mountRef = useRef<Group>(null);
   const [scene, setScene] = useState<Object3D | null>(null);
@@ -111,7 +115,7 @@ export function GltfPenelopeRig({
         for (const [joint, boneName] of Object.entries(boneMap)) {
           const bone = gltf.scene.getObjectByName(boneName as string) as Bone | undefined;
           if (bone) {
-            rig[joint as keyof RigRefs].current = createBoneProxy(bone);
+            rig[joint as keyof RigRefs].current = createBoneProxy(bone, restCorrections?.[joint as keyof RigRefs]);
             mappedBones++;
           }
         }

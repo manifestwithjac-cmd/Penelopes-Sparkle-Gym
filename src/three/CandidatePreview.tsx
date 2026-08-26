@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 import * as THREE from "three";
 
 // TEMPORARY evaluation harness for candidate rigged base-character assets —
@@ -24,19 +26,20 @@ function Loader({
   useEffect(() => {
     if (loaded.current) return;
     loaded.current = true;
-    new GLTFLoader().load(`/candidate-preview/${file}`, (gltf) => {
-      const box = new THREE.Box3().setFromObject(gltf.scene);
+
+    const frame = (object: THREE.Object3D) => {
+      const box = new THREE.Box3().setFromObject(object);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
-      gltf.scene.position.sub(center);
-      scene.add(gltf.scene);
+      object.position.sub(center);
+      scene.add(object);
 
       if (pose === "cartwheel-mid") {
         // Rough sanity pose test — NOT the real retargeted animation, just
         // proof the skeleton deforms this mesh sensibly: raise both arms
         // overhead, spread legs, tip the spine, so we can see whether skin
         // weights hold up under a big pose instead of tearing/collapsing.
-        const bone = (n: string) => gltf.scene.getObjectByName(n);
+        const bone = (n: string) => object.getObjectByName(n);
         bone("L_Upperarm")?.rotation.set(0, 0, -2.6);
         bone("R_Upperarm")?.rotation.set(0, 0, 2.6);
         bone("L_Thigh")?.rotation.set(0, 0, 0.9);
@@ -52,7 +55,22 @@ function Loader({
       const heightTarget = isFace ? size.y * 0.42 : size.y * 0.15;
       camera.position.set(Math.sin(rad) * dist, heightTarget, Math.cos(rad) * dist);
       camera.lookAt(0, heightTarget, 0);
-    });
+    };
+
+    if (file.endsWith(".obj")) {
+      const dir = file.slice(0, file.lastIndexOf("/") + 1);
+      const objName = file.slice(file.lastIndexOf("/") + 1);
+      const mtlName = objName.replace(/\.obj$/, ".mtl");
+      new MTLLoader().setPath(`/candidate-preview/${dir}`).load(mtlName, (materials) => {
+        materials.preload();
+        new OBJLoader()
+          .setMaterials(materials)
+          .setPath(`/candidate-preview/${dir}`)
+          .load(objName, frame);
+      });
+    } else {
+      new GLTFLoader().load(`/candidate-preview/${file}`, (gltf) => frame(gltf.scene));
+    }
   }, [file, angleDeg, zoom, pose, scene, camera]);
 
   return null;

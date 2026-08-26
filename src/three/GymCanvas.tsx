@@ -3,8 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { PenelopeRig } from "./character/PenelopeRig";
 import { GltfPenelopeRig } from "./character/GltfPenelopeRig";
 import { CANDIDATE_A_BONE_MAP } from "./character/gltfBoneMap";
-import { FbxPenelopeRig } from "./character/FbxPenelopeRig";
-import { CANDIDATE_C_BONE_MAP } from "./character/mixamoBoneMap";
+import { CANDIDATE_C_GLB_BONE_MAP } from "./character/mixamoGlbBoneMap";
 import { useCharacterRig } from "./character/useCharacterRig";
 import { usePlayTrick } from "./animation/usePlayTrick";
 import { GymEnvironment } from "./scenes/GymEnvironment";
@@ -64,7 +63,12 @@ function PenelopeSceneActor() {
           facingYaw={Math.PI}
         />
       ) : CANDIDATE_RIG === "c" ? (
-        <FbxPenelopeRig rig={rig} url="/candidate-preview/c/StylizedGirl.fbx" boneMap={CANDIDATE_C_BONE_MAP} />
+        <GltfPenelopeRig
+          rig={rig}
+          url="/candidate-preview/c-clean/StylizedGirl-clean.glb"
+          boneMap={CANDIDATE_C_GLB_BONE_MAP}
+          hipBoneName="mixamorig:Hips"
+        />
       ) : (
         <PenelopeRig rig={rig} leotard={leotard} hairColor={PENELOPE_HAIR} skinTone={PENELOPE_SKIN} />
       )}

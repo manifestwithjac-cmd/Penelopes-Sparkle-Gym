@@ -11,16 +11,6 @@ import { createBoneProxy } from "./boneProxy";
 // the art-cleanup pass.
 const TARGET_HEIGHT = 1.56;
 
-// applyPose() (poseUtils.ts) always forces root.position.y to
-// HIP_HEIGHT_BASE + py, exactly like the procedural rig where "root" means
-// "hip height above the floor" and the leg meshes are authored to reach
-// from there down to y=0. To get the same behavior out of a foreign
-// skeleton, we align the loaded mesh so its own hip bone sits at local
-// y=0 — then when root's y gets forced to HIP_HEIGHT_BASE, the skeleton's
-// own leg length (now scaled to roughly match ours) carries the feet down
-// toward the floor, same as the procedural rig.
-const HIP_BONE_NAME = "Hip";
-
 interface GltfPenelopeRigProps {
   rig: RigRefs;
   url: string;
@@ -29,6 +19,15 @@ interface GltfPenelopeRigProps {
    * necessarily match ours; baked into the loaded mesh (not the root
    * wrapper, which applyPose() overwrites every frame). */
   facingYaw?: number;
+  /** applyPose() (poseUtils.ts) always forces root.position.y to
+   * HIP_HEIGHT_BASE + py, exactly like the procedural rig where "root"
+   * means "hip height above the floor" and the leg meshes are authored to
+   * reach from there down to y=0. To get the same behavior out of a
+   * foreign skeleton, we align the loaded mesh so its own hip bone sits
+   * at local y=0 — then when root's y gets forced to HIP_HEIGHT_BASE, the
+   * skeleton's own leg length (now scaled to roughly match ours) carries
+   * the feet down toward the floor, same as the procedural rig. */
+  hipBoneName?: string;
 }
 
 /**
@@ -38,7 +37,7 @@ interface GltfPenelopeRigProps {
  * "point the ref at the bone") so usePlayTrick/poseUtils drive it with
  * zero changes — same keyframe data, same call sites.
  */
-export function GltfPenelopeRig({ rig, url, boneMap, facingYaw = 0 }: GltfPenelopeRigProps) {
+export function GltfPenelopeRig({ rig, url, boneMap, facingYaw = 0, hipBoneName = "Hip" }: GltfPenelopeRigProps) {
   const mountRef = useRef<Group>(null);
   const [scene, setScene] = useState<Object3D | null>(null);
 
@@ -60,7 +59,7 @@ export function GltfPenelopeRig({ rig, url, boneMap, facingYaw = 0 }: GltfPenelo
       gltf.scene.position.z -= center.z * scale;
 
       gltf.scene.updateMatrixWorld(true);
-      const hipBone = gltf.scene.getObjectByName(HIP_BONE_NAME);
+      const hipBone = gltf.scene.getObjectByName(hipBoneName);
       const hipWorldY = hipBone ? hipBone.getWorldPosition(new Vector3()).y : 0;
       gltf.scene.position.y -= hipWorldY;
 

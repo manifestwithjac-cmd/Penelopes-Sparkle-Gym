@@ -60,6 +60,19 @@ function Loader({
         // eslint-disable-next-line no-console
         console.log("TRI_COUNT", tris);
       }
+      if (new URLSearchParams(window.location.search).has("mesh-stats")) {
+        const stats: { name: string; verts: number; tris: number }[] = [];
+        object.traverse((c) => {
+          if (c instanceof THREE.Mesh) {
+            const geo = c.geometry;
+            const verts = geo.attributes.position?.count ?? 0;
+            const tris = geo.index ? geo.index.count / 3 : verts / 3;
+            stats.push({ name: c.name, verts, tris });
+          }
+        });
+        // eslint-disable-next-line no-console
+        console.log("MESH_STATS", JSON.stringify(stats));
+      }
       if (new URLSearchParams(window.location.search).has("list-names")) {
         const names: string[] = [];
         object.traverse((c) => names.push(`${c.type}:${c.name}`));

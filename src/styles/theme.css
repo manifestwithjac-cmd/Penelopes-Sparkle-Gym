@@ -1,0 +1,99 @@
+/*
+  Design tokens for Penelope's Sparkle Gym.
+  Pink + purple sparkle motif, soft rounded "cute 3D" feel via layered
+  shadows and gradients rather than actual 3D rendering (keeps this fast
+  on iPad/phone hardware).
+*/
+:root {
+  /* Core palette */
+  --pink-50: #fff0f7;
+  --pink-100: #ffd9ec;
+  --pink-200: #ffb3d9;
+  --pink-300: #ff8cc6;
+  --pink-400: #ff5fae;
+  --pink-500: #ff3d9a;
+  --pink-600: #e82280;
+  --pink-700: #c11569;
+
+  --purple-50: #f6f0ff;
+  --purple-100: #e6d6ff;
+  --purple-200: #cfaeff;
+  --purple-300: #b285ff;
+  --purple-400: #9a5cf5;
+  --purple-500: #8438e0;
+  --purple-600: #6c26bd;
+  --purple-700: #521a92;
+
+  --gold-300: #ffe08a;
+  --gold-400: #ffcd3c;
+  --gold-500: #ffb703;
+
+  --mint-300: #a4f0d1;
+  --mint-500: #3fd8a0;
+
+  --sky-300: #aee3ff;
+  --sky-500: #4fb8ff;
+
+  --cream: #fffaf3;
+  --white: #ffffff;
+  --ink: #4a2159;
+  --ink-soft: #7a5a8c;
+
+  /* Semantic */
+  --color-bg: linear-gradient(180deg, #fdf1ff 0%, #f6e6ff 45%, #f0d9ff 100%);
+  --color-surface: var(--white);
+  --color-surface-soft: var(--pink-50);
+  --color-primary: var(--pink-500);
+  --color-primary-strong: var(--pink-600);
+  --color-secondary: var(--purple-500);
+  --color-accent: var(--gold-400);
+  --color-text: var(--ink);
+  --color-text-soft: var(--ink-soft);
+  --color-success: var(--mint-500);
+
+  /* Shape */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-round: 999px;
+
+  /* Spacing (touch-friendly scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Touch targets */
+  --tap-min: 64px;
+  --tap-comfortable: 84px;
+
+  /* Shadows */
+  --shadow-soft: 0 6px 16px rgba(120, 40, 130, 0.18);
+  --shadow-pop: 0 10px 28px rgba(120, 40, 130, 0.28);
+  --shadow-inset: inset 0 -4px 0 rgba(0, 0, 0, 0.08);
+
+  /* Typography */
+  --font-display: "Baloo 2", "Fredoka", "Comic Sans MS", system-ui, sans-serif;
+  --font-body: "Nunito", "Baloo 2", system-ui, sans-serif;
+
+  /* Motion */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --dur-fast: 150ms;
+  --dur-med: 320ms;
+  --dur-slow: 600ms;
+
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur-med: 1ms;
+    --dur-slow: 1ms;
+  }
+}

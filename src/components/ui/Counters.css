@@ -1,0 +1,32 @@
+.counter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border-radius: var(--radius-round);
+  padding: var(--space-2) var(--space-4);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1rem, 3.4vw, 1.3rem);
+  color: var(--color-primary-strong);
+  min-height: 44px;
+}
+
+.counter-star {
+  border: 2px solid var(--pink-200);
+}
+
+.counter-point {
+  border: 2px solid var(--purple-200);
+  color: var(--purple-600);
+}
+
+.counter-icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.counter-value {
+  font-variant-numeric: tabular-nums;
+}

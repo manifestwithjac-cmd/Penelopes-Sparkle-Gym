@@ -1,0 +1,37 @@
+.star-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.star-burst__star {
+  position: absolute;
+  font-size: var(--size);
+  opacity: 0;
+  animation: starPop 900ms var(--ease-soft) var(--delay) forwards;
+  filter: drop-shadow(0 2px 3px rgba(120, 30, 120, 0.25));
+}
+
+@keyframes starPop {
+  0% {
+    transform: translate(0, 0) scale(0.3) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.1) rotate(20deg);
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.6) rotate(120deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-burst__star {
+    animation-duration: 1ms;
+  }
+}

@@ -1,0 +1,76 @@
+.big-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-round);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-pop), var(--shadow-inset);
+  transition: transform var(--dur-fast) var(--ease-bounce), box-shadow var(--dur-fast);
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  padding: 0 var(--space-5);
+}
+
+.big-button:active {
+  transform: scale(0.94) translateY(2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.big-button:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+  transform: none;
+}
+
+.big-button--primary {
+  background: linear-gradient(180deg, var(--pink-400), var(--pink-600));
+  color: var(--white);
+}
+
+.big-button--secondary {
+  background: linear-gradient(180deg, var(--purple-300), var(--purple-500));
+  color: var(--white);
+}
+
+.big-button--gold {
+  background: linear-gradient(180deg, var(--gold-300), var(--gold-500));
+  color: var(--ink);
+}
+
+.big-button--ghost {
+  background: var(--color-surface);
+  color: var(--color-primary-strong);
+  box-shadow: var(--shadow-soft);
+  border: 2px solid var(--pink-200);
+}
+
+.big-button--md {
+  font-size: clamp(0.95rem, 3vw, 1.1rem);
+  min-height: var(--tap-min);
+}
+
+.big-button--lg {
+  font-size: clamp(1.1rem, 3.6vw, 1.4rem);
+  min-height: var(--tap-comfortable);
+  padding: 0 var(--space-6);
+}
+
+.big-button--xl {
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  min-height: 96px;
+  padding: 0 var(--space-8);
+}
+
+.big-button__icon {
+  font-size: 1.3em;
+  line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .big-button {
+    transition: none;
+  }
+}

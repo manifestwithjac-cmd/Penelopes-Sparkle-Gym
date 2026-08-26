@@ -1,0 +1,91 @@
+// Lightweight end-to-end smoke test for the core game loop, using
+// playwright-core directly against the pre-installed sandbox chromium
+// (the @playwright/test runner's launch flags aren't compatible with this
+// container's browser build, so this script drives the browser directly).
+//
+// Usage: `npm run dev` in one terminal, then `node tests/e2e/core-loop.mjs`.
+import { chromium } from "playwright-core";
+import assert from "node:assert/strict";
+
+const BASE_URL = process.env.BASE_URL || "http://localhost:5173";
+const CHROME_PATH =
+  process.env.CHROME_PATH || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+
+async function withPage(fn) {
+  const browser = await chromium.launch({
+    executablePath: CHROME_PATH,
+    args: ["--no-sandbox", "--disable-dev-shm-usage"],
+  });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const pageErrors = [];
+    page.on("pageerror", (err) => pageErrors.push(err.message));
+    await fn(page, pageErrors);
+  } finally {
+    await browser.close();
+  }
+}
+
+async function performCartwheel(page) {
+  await page.getByText("GO!", { exact: false }).click();
+  for (let i = 0; i < 3; i++) {
+    await page
+      .locator(".tap-target")
+      .click({ timeout: 2000 })
+      .catch(() => {});
+  }
+  await page.locator(".result-panel").waitFor({ timeout: 3000 });
+}
+
+async function testCoreLoop() {
+  await withPage(async (page, pageErrors) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    await page.getByText("PLAY", { exact: false }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+
+    await page.getByText("Floor", { exact: true }).first().click();
+    await page.locator(".apparatus-scene").waitFor({ timeout: 3000 });
+
+    await performCartwheel(page);
+
+    const starsText = await page.locator(".counter-star .counter-value").innerText();
+    assert.ok(Number(starsText) > 0, "stars should increase after a successful trick");
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: first-time player can play a cartwheel and earn stars");
+  });
+}
+
+async function testReturningPlayer() {
+  await withPage(async (page) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    await page.getByText("PLAY", { exact: false }).click();
+    await page.getByText("Floor", { exact: true }).first().click();
+    await performCartwheel(page);
+
+    const savedRaw = await page.evaluate(() =>
+      localStorage.getItem("penelopes-sparkle-gym-save"),
+    );
+    const saved = JSON.parse(savedRaw);
+    assert.ok(saved.state.stars > 0, "save data should record earned stars");
+
+    await page.reload({ waitUntil: "networkidle" });
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+    const starsText = await page.locator(".counter-star .counter-value").innerText();
+    assert.ok(Number(starsText) > 0, "returning player keeps stars and skips the title screen");
+    console.log("PASS: returning player skips the title screen and keeps their stars");
+  });
+}
+
+const tests = [testCoreLoop, testReturningPlayer];
+let failed = false;
+for (const t of tests) {
+  try {
+    await t();
+  } catch (err) {
+    failed = true;
+    console.error(`FAIL: ${t.name}`);
+    console.error(err);
+  }
+}
+process.exit(failed ? 1 : 0);

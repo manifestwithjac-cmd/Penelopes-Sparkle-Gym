@@ -1,0 +1,69 @@
+.tap-target {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: clamp(64px, 16vw, 96px);
+  height: clamp(64px, 16vw, 96px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: targetPop 220ms var(--ease-bounce);
+}
+
+.tap-target__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 6px solid var(--gold-400);
+  animation-name: ringShrink;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.tap-target__glyph {
+  position: relative;
+  font-size: clamp(2.2rem, 8vw, 3.2rem);
+  color: var(--pink-500);
+  filter: drop-shadow(0 3px 4px rgba(120, 30, 120, 0.3));
+  animation: glyphPulse 700ms ease-in-out infinite;
+}
+
+@keyframes ringShrink {
+  from {
+    transform: scale(1.6);
+    opacity: 0.9;
+    border-color: var(--gold-400);
+  }
+  70% {
+    border-color: var(--pink-500);
+  }
+  to {
+    transform: scale(0.35);
+    opacity: 0.15;
+    border-color: var(--pink-600);
+  }
+}
+
+@keyframes glyphPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes targetPop {
+  from {
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tap-target__glyph {
+    animation: none;
+  }
+}

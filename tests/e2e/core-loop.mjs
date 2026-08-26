@@ -77,7 +77,33 @@ async function testReturningPlayer() {
   });
 }
 
-const tests = [testCoreLoop, testReturningPlayer];
+async function testAllApparatusReachable() {
+  await withPage(async (page, pageErrors) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    await page.getByText("PLAY", { exact: false }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+
+    for (const name of ["Floor", "Beam", "Bars", "Trampoline", "Vault"]) {
+      await page.getByText(name, { exact: true }).first().click();
+      await page.locator(".apparatus-scene").waitFor({ timeout: 3000 });
+      await page.getByText("GO!", { exact: false }).click();
+      // Just confirm the minigame's interactive stage renders — full play-
+      // through of each is covered visually; this guards against a wiring
+      // regression breaking one apparatus's minigame import.
+      await page
+        .locator(".tap-target, .moving-indicator")
+        .first()
+        .waitFor({ timeout: 2000 });
+      await page.getByText("Gym", { exact: true }).click();
+      await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+    }
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: all five apparatus are reachable and start a minigame without errors");
+  });
+}
+
+const tests = [testCoreLoop, testReturningPlayer, testAllApparatusReachable];
 let failed = false;
 for (const t of tests) {
   try {

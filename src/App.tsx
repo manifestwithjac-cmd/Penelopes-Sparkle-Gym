@@ -21,6 +21,7 @@ const RigTest = lazy(() => import("./three/RigTest").then((m) => ({ default: m.R
 const AnimFrameTest = lazy(() =>
   import("./three/AnimFrameTest").then((m) => ({ default: m.AnimFrameTest })),
 );
+const CandidatePreview = lazy(() => import("./three/CandidatePreview"));
 
 // Scenes calm enough for the soft background loop; minigames stay quiet
 // so it never competes with trick SFX/cheers.
@@ -101,6 +102,15 @@ function App() {
       <div className="app-root">
         <Suspense fallback={null}>
           <AnimFrameTest />
+        </Suspense>
+      </div>
+    );
+  }
+  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("candidate-preview")) {
+    return (
+      <div className="app-root">
+        <Suspense fallback={null}>
+          <CandidatePreview />
         </Suspense>
       </div>
     );

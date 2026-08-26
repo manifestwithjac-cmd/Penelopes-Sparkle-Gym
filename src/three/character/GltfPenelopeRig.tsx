@@ -11,6 +11,24 @@ import { createBoneProxy } from "./boneProxy";
 // the art-cleanup pass.
 const TARGET_HEIGHT = 1.56;
 
+// A candidate rig can fail invisibly — the loader errors, or a NaN sneaks
+// into the scale/position math — leaving nothing on screen and nothing in
+// a console the person testing on their phone can see. Surface it as a
+// plain on-page banner instead of hoping someone has devtools attached.
+// Only ever fires on the debug candidate-rig path (see GymCanvas.tsx) —
+// invisible in normal play.
+function showLoadError(context: string, err: unknown) {
+  // eslint-disable-next-line no-console
+  console.error(`[GltfPenelopeRig] ${context}:`, err);
+  if (typeof document === "undefined") return;
+  const banner = document.createElement("div");
+  banner.style.cssText =
+    "position:fixed;top:0;left:0;right:0;z-index:99999;background:#c0202080;" +
+    "color:#fff;font:12px monospace;padding:8px;white-space:pre-wrap;max-height:40vh;overflow:auto;";
+  banner.textContent = `${context}: ${err instanceof Error ? `${err.message}\n${err.stack ?? ""}` : String(err)}`;
+  document.body.appendChild(banner);
+}
+
 interface GltfPenelopeRigProps {
   rig: RigRefs;
   url: string;
@@ -47,30 +65,50 @@ export function GltfPenelopeRig({ rig, url, boneMap, facingYaw = 0, hipBoneName 
 
   useEffect(() => {
     let cancelled = false;
-    new GLTFLoader().load(url, (gltf) => {
-      if (cancelled) return;
-      gltf.scene.rotation.y = facingYaw;
-      const box = new Box3().setFromObject(gltf.scene);
-      const size = box.getSize(new Vector3());
-      const center = box.getCenter(new Vector3());
-      const scale = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
-      gltf.scene.scale.setScalar(scale);
-      gltf.scene.position.x -= center.x * scale;
-      gltf.scene.position.z -= center.z * scale;
+    new GLTFLoader().load(
+      url,
+      (gltf) => {
+        if (cancelled) return;
+        try {
+          gltf.scene.rotation.y = facingYaw;
+          const box = new Box3().setFromObject(gltf.scene);
+          const size = box.getSize(new Vector3());
+          const center = box.getCenter(new Vector3());
+          if (!isFinite(size.x) || !isFinite(size.y) || !isFinite(size.z)) {
+            throw new Error(`non-finite bounding box: ${JSON.stringify(size)}`);
+          }
+          const scale = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
+          gltf.scene.scale.setScalar(scale);
+          gltf.scene.position.x -= center.x * scale;
+          gltf.scene.position.z -= center.z * scale;
 
-      gltf.scene.updateMatrixWorld(true);
-      const hipBone = gltf.scene.getObjectByName(hipBoneName);
-      const hipWorldY = hipBone ? hipBone.getWorldPosition(new Vector3()).y : 0;
-      gltf.scene.position.y -= hipWorldY;
+          gltf.scene.updateMatrixWorld(true);
+          const hipBone = gltf.scene.getObjectByName(hipBoneName);
+          if (!hipBone) {
+            showLoadError(url, `hip bone "${hipBoneName}" not found in loaded scene`);
+          }
+          const hipWorldY = hipBone ? hipBone.getWorldPosition(new Vector3()).y : 0;
+          gltf.scene.position.y -= hipWorldY;
 
-      for (const [joint, boneName] of Object.entries(boneMap)) {
-        const bone = gltf.scene.getObjectByName(boneName as string) as Bone | undefined;
-        if (bone) {
-          rig[joint as keyof RigRefs].current = createBoneProxy(bone);
+          let mappedBones = 0;
+          for (const [joint, boneName] of Object.entries(boneMap)) {
+            const bone = gltf.scene.getObjectByName(boneName as string) as Bone | undefined;
+            if (bone) {
+              rig[joint as keyof RigRefs].current = createBoneProxy(bone);
+              mappedBones++;
+            }
+          }
+          if (mappedBones === 0) {
+            showLoadError(url, "none of boneMap's bone names were found in the loaded scene");
+          }
+          setScene(gltf.scene);
+        } catch (err) {
+          showLoadError(`${url} (post-load processing)`, err);
         }
-      }
-      setScene(gltf.scene);
-    });
+      },
+      undefined,
+      (err) => showLoadError(`${url} (load failed)`, err),
+    );
     return () => {
       cancelled = true;
     };

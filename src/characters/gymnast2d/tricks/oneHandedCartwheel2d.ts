@@ -2,18 +2,13 @@ import type { TrickAnimationDef2D } from "../poseUtils2d";
 import { easeInOutQuad2D, easeOutBack2D, linear2D } from "../poseUtils2d";
 
 /**
- * A flat-cutout cartwheel: root spins a full 360° (the "wheel") while
- * traveling sideways, with arms/legs flinging out into a wide star/X at
- * the inverted point and gathering back in to land — the 2D-cutout
- * equivalent of the old 3D rig's root.rz + limb-articulation approach
- * (three/animation/tricks/cartwheel.ts), re-authored from scratch since a
- * flat side-view spin can't reuse rotation values tuned for a 3D camera.
- *
- * Phases mirror the 3D version's: ready -> windup -> launch(star) ->
- * inverted -> gather/land -> stand -> celebrate.
+ * Same wheeling spin/travel and leg-splay as cartwheel2d.ts, but only the
+ * right arm reaches up into the big starfish spread — the left arm stays
+ * low and close to her side through the whole trick, so only one hand is
+ * ever "up," matching the trick's name.
  */
-export const CARTWHEEL_2D: TrickAnimationDef2D = {
-  id: "cartwheel",
+export const ONE_HANDED_CARTWHEEL_2D: TrickAnimationDef2D = {
+  id: "one_handed_cartwheel",
   durationMs: 1600,
   keyframes: [
     {
@@ -34,9 +29,8 @@ export const CARTWHEEL_2D: TrickAnimationDef2D = {
       ease: easeInOutQuad2D,
       pose: {
         root: { x: -15, y: 4, rot: -12 },
-        shoulderL: { rot: 30 },
+        shoulderL: { rot: 15 },
         shoulderR: { rot: -30 },
-        elbowL: { rot: 15 },
         elbowR: { rot: -15 },
         hipL: { rot: 12 },
         hipR: { rot: -12 },
@@ -50,15 +44,11 @@ export const CARTWHEEL_2D: TrickAnimationDef2D = {
       ease: linear2D,
       pose: {
         root: { x: -8, y: -6, rot: -95 },
-        // Full starfish spread: shoulder near-horizontal (~100°) with the
-        // elbow left straight (~0) reaches an arm's full ~30-unit length
-        // outward past the head's silhouette. Past ~130° an arm actually
-        // swings back TOWARD vertical — losing horizontal reach and
-        // landing back inside the same-colored head circle, invisible —
-        // so this is closer to the sweet spot than "more" would be.
-        shoulderL: { rot: 100 },
+        // Same near-horizontal/straight-elbow reach as cartwheel2d.ts's
+        // starfish frames (see the comment there) — negative rotation is
+        // what actually swings the RIGHT arm outward past the head.
+        shoulderL: { rot: 18 },
         shoulderR: { rot: -100 },
-        elbowL: { rot: 0 },
         elbowR: { rot: 0 },
         hipL: { rot: -70 },
         hipR: { rot: 70 },
@@ -72,9 +62,8 @@ export const CARTWHEEL_2D: TrickAnimationDef2D = {
       ease: linear2D,
       pose: {
         root: { x: 0, y: -10, rot: -180 },
-        shoulderL: { rot: 112 },
+        shoulderL: { rot: 18 },
         shoulderR: { rot: -112 },
-        elbowL: { rot: 0 },
         elbowR: { rot: 0 },
         hipL: { rot: -78 },
         hipR: { rot: 78 },
@@ -88,9 +77,8 @@ export const CARTWHEEL_2D: TrickAnimationDef2D = {
       ease: linear2D,
       pose: {
         root: { x: 8, y: -6, rot: -265 },
-        shoulderL: { rot: 75 },
+        shoulderL: { rot: 12 },
         shoulderR: { rot: -75 },
-        elbowL: { rot: 5 },
         elbowR: { rot: -5 },
         hipL: { rot: -35 },
         hipR: { rot: 35 },
@@ -104,9 +92,8 @@ export const CARTWHEEL_2D: TrickAnimationDef2D = {
       ease: easeInOutQuad2D,
       pose: {
         root: { x: 16, y: 2, rot: -360 },
-        shoulderL: { rot: 22 },
+        shoulderL: { rot: 10 },
         shoulderR: { rot: -22 },
-        elbowL: { rot: 8 },
         elbowR: { rot: -8 },
         hipL: { rot: 6 },
         hipR: { rot: -6 },
@@ -120,12 +107,9 @@ export const CARTWHEEL_2D: TrickAnimationDef2D = {
       ease: easeOutBack2D,
       pose: {
         root: { x: 16, y: -6, rot: -360 },
-        // +130/-130 swings each arm up and outward (a "cheer" V) from its
-        // hanging-down rest angle — capped short of straight-up so the
-        // tip stays outside the hair's silhouette (hair paints last/on
-        // top of the arms for every other pose, where that's correct,
-        // but a raised-enough arm would otherwise end up hidden under it).
-        shoulderL: { rot: 130 },
+        // Only the right arm throws up in celebration too, staying
+        // consistent with "one hand up" for the whole trick.
+        shoulderL: { rot: 6 },
         shoulderR: { rot: -130 },
         hipL: { rot: 2 },
         hipR: { rot: -2 },

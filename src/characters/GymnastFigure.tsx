@@ -76,6 +76,10 @@ export function GymnastFigure({
           d="M22,36 Q20,10 50,10 Q80,10 78,36 Q78,48 72,50 Q76,28 50,24 Q24,28 28,50 Q22,48 22,36 Z"
           fill={hairColor}
         />
+        {/* hair (side strands, a little longer — falls past the jaw
+            toward the shoulders instead of stopping at the head) */}
+        <rect x="23" y="40" width="9" height="32" rx="4.5" fill={hairColor} />
+        <rect x="68" y="40" width="9" height="32" rx="4.5" fill={hairColor} />
         {/* face */}
         <circle cx="40" cy="40" r="4" fill={eyeColor} />
         <circle cx="60" cy="40" r="4" fill={eyeColor} />

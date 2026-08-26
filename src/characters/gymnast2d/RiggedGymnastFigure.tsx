@@ -150,7 +150,38 @@ export function RiggedGymnastFigure({
           </g>
         </g>
 
-        {/* arms (drawn on top of the torso) */}
+        {/* head (drawn BEFORE the arms — a raised/starfish arm needs to
+            paint in front of her hair, not get swallowed by it; at rest
+            the arms hang well below the head so this ordering makes no
+            visual difference there) */}
+        <g transform="translate(50 38)">
+          <g ref={rig.head}>
+            <circle cx="0" cy="0" r="26" fill={skinTone} />
+            {/* hair (back) */}
+            <path
+              d="M-28,-2 Q-30,-28 0,-28 Q30,-28 28,-2 Q28,10 22,12 Q26,-10 0,-14 Q-26,-10 -22,12 Q-28,10 -28,-2 Z"
+              fill={hairColor}
+            />
+            {/* hair (side strands, a little longer — falls past the jaw
+                toward the shoulders instead of stopping at the head) */}
+            <rect x="-27" y="2" width="9" height="32" rx="4.5" fill={hairColor} />
+            <rect x="18" y="2" width="9" height="32" rx="4.5" fill={hairColor} />
+            {/* face */}
+            <circle cx="-10" cy="2" r="4" fill={eyeColor} />
+            <circle cx="10" cy="2" r="4" fill={eyeColor} />
+            <circle cx="-8.5" cy="0.5" r="1.3" fill="#ffffff" />
+            <circle cx="11.5" cy="0.5" r="1.3" fill="#ffffff" />
+            <g fill="var(--purple-300, #b285ff)" opacity="0.85">
+              <path d="M-16,-6 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
+              <path d="M12,-6 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
+            </g>
+            <path d="M-7,10 Q0,15 7,10" stroke="#7a4a2b" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <circle cx="-16" cy="8" r="3.4" fill="#ff8cc6" opacity="0.55" />
+            <circle cx="16" cy="8" r="3.4" fill="#ff8cc6" opacity="0.55" />
+          </g>
+        </g>
+
+        {/* arms (drawn on top of the torso AND the head) */}
         <g transform="translate(31 62)">
           <g ref={rig.shoulderL}>
             <rect x="-5" y="0" width="10" height="15" rx="5" fill={skinTone} />
@@ -169,30 +200,6 @@ export function RiggedGymnastFigure({
                 <rect x="-5" y="0" width="10" height="15" rx="5" fill={skinTone} />
               </g>
             </g>
-          </g>
-        </g>
-
-        {/* head */}
-        <g transform="translate(50 38)">
-          <g ref={rig.head}>
-            <circle cx="0" cy="0" r="26" fill={skinTone} />
-            {/* hair (back) */}
-            <path
-              d="M-28,-2 Q-30,-28 0,-28 Q30,-28 28,-2 Q28,10 22,12 Q26,-10 0,-14 Q-26,-10 -22,12 Q-28,10 -28,-2 Z"
-              fill={hairColor}
-            />
-            {/* face */}
-            <circle cx="-10" cy="2" r="4" fill={eyeColor} />
-            <circle cx="10" cy="2" r="4" fill={eyeColor} />
-            <circle cx="-8.5" cy="0.5" r="1.3" fill="#ffffff" />
-            <circle cx="11.5" cy="0.5" r="1.3" fill="#ffffff" />
-            <g fill="var(--purple-300, #b285ff)" opacity="0.85">
-              <path d="M-16,-6 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
-              <path d="M12,-6 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
-            </g>
-            <path d="M-7,10 Q0,15 7,10" stroke="#7a4a2b" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <circle cx="-16" cy="8" r="3.4" fill="#ff8cc6" opacity="0.55" />
-            <circle cx="16" cy="8" r="3.4" fill="#ff8cc6" opacity="0.55" />
           </g>
         </g>
       </g>

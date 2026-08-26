@@ -1,5 +1,6 @@
 import type { LeotardPattern } from "../data/types";
-import { LeotardDecor, leotardFillRef } from "./leotardFill";
+import { LeotardDecor } from "./leotardFill";
+import { leotardFillRef } from "./leotardFillRef";
 import "./GymnastFigure.css";
 
 export type FigurePose = "idle" | "celebrate" | "wobble" | "cheer" | "wave" | "bow";

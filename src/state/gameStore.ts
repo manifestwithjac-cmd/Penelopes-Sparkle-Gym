@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ApparatusId } from "../data/types";
-import { TRICKS_BY_ID } from "../data/tricks";
+import { TRICKS, TRICKS_BY_ID } from "../data/tricks";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { CHALLENGES } from "../data/challenges";
 import { LEOTARDS_BY_ID } from "../data/leotards";
@@ -72,6 +72,7 @@ interface GameState {
   resetProgress: () => void;
   toggleDevMode: () => void;
   devAddStars: (n: number) => void;
+  devUnlockEverything: () => void;
 }
 
 function pushCelebration(queue: CelebrationEvent[], event: Omit<CelebrationEvent, "id">) {
@@ -279,6 +280,19 @@ export const useGameStore = create<GameState>()(
 
       toggleDevMode: () => set((prev) => ({ devMode: !prev.devMode })),
       devAddStars: (n) => set((prev) => ({ stars: Math.max(0, prev.stars + n) })),
+
+      devUnlockEverything: () =>
+        set((prev) => {
+          const trickStats = { ...prev.trickStats };
+          for (const trick of TRICKS) {
+            trickStats[trick.id] = { attempts: 10, successes: 10 };
+          }
+          return {
+            stars: Math.max(prev.stars, 999),
+            trickStats,
+            unlockedAchievementIds: ACHIEVEMENTS.map((a) => a.id),
+          };
+        }),
     }),
     {
       name: STORAGE_KEY,

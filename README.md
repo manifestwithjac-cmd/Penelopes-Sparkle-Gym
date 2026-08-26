@@ -44,14 +44,22 @@ src/
   minigames/    One component per apparatus, plus minigames/shared for
                 the reusable tap-timing engine, trick picker, and result
                 panel every minigame is built from.
-  components/   Generic UI atoms (BigButton, counters, sound toggle) and
-                the nav bar.
-  effects/      StarBurst (particle burst) and CelebrationToast (queued
-                "NEW TRICK!" / achievement / leotard toasts).
+  components/   Generic UI atoms (BigButton, counters, sound toggle,
+                settings panel) and the nav bar.
+  effects/      StarBurst (particle burst), CelebrationToast (queued
+                "NEW TRICK!" / achievement / leotard toasts), and the
+                Spider Cartwheel's SpiderwebBurst flourish.
+  shop/         Leotard shop card rendering (dressing-room UI).
+  friends/      FriendSprite (world figure) + FriendPopup (dialogue,
+                challenge status, high-five).
+  audio/        Synthesized SFX + background loop (Web Audio, no sound
+                asset files) behind one `useSound()` hook.
+  dev/          Developer-only shortcuts panel, reached via a hidden
+                gesture in Settings — never shown in normal play.
   utils/        Scoring/tier math, small hooks.
   save/         Re-exports the store; the one place save/load should be
                 imported from if that ever stops being "just Zustand".
-tests/e2e/      Playwright smoke test for the core loop (see below).
+tests/e2e/      Playwright smoke test suite (see below).
 ```
 
 ## Architecture decisions
@@ -81,15 +89,26 @@ tests/e2e/      Playwright smoke test for the core loop (see below).
 - **Reduced motion:** honored both via the OS `prefers-reduced-motion`
   media query and an explicit in-game toggle
   (`state.reducedMotion` → `[data-reduced-motion]` attribute on `<html>`).
+- **Audio is fully synthesized** (`audio/audioEngine.ts`, Web Audio
+  oscillators) — no external sound/music files to license or load. Every
+  call site goes through `useSound()`, the one place that checks the
+  `soundOn` setting, so muting can't be bypassed by a forgetful call site.
+- **Dev mode is a hidden gesture, not a build flag.** Tapping the version
+  line in Settings 5 times reveals `dev/DevPanel.tsx` (add stars, unlock
+  everything, jump to any apparatus, instant reset) for this session
+  only — `devMode` is intentionally excluded from persisted save data.
 
 ## Testing
 
 `tests/e2e/core-loop.mjs` drives the app with `playwright-core` against
 the sandbox's pre-installed Chromium directly (the `@playwright/test`
 runner's default launch flags aren't compatible with this container's
-browser build, so the script launches the browser itself). It covers the
-Phase 2 "actually playable" requirement: title → gym → floor → perform a
-cartwheel → stars increase → reload → progress persists.
+browser build, so the script launches the browser itself, sharing one
+browser instance with a fresh context per test). It covers: the core
+play loop and save persistence, all five apparatus, the leotard shop,
+the sound toggle, friend interactions, the snack bar/lounge/trophy wall
+and the 67 easter egg, and the settings reset-confirmation + dev-mode
+flow.
 
 Run the dev server first, then:
 
@@ -100,7 +119,9 @@ npm run test:e2e
 
 ## Build status
 
-See commit history / project board for phase-by-phase progress against
-the original build spec (Foundation → core loop → all apparatus → trick
-progression → Spider Cartwheel → leotards → friends → world features →
-audio → polish).
+All ten phases of the original build spec are complete: Foundation →
+core loop → all five apparatus → trick progression → Spider Cartwheel →
+leotard shop → friends & challenges → world features (snack bar, lounge,
+trophy wall) → audio → polish (settings, reduced motion, dev mode). See
+commit history for the phase-by-phase history and the reasoning behind
+each.

@@ -10,14 +10,18 @@ import { SoundToggle } from "../components/ui/SoundToggle";
 import { ApparatusNavBar } from "../components/nav/ApparatusNavBar";
 import { FriendSprite } from "../friends/FriendSprite";
 import { FriendPopup } from "../friends/FriendPopup";
+import { SettingsPanel } from "../components/settings/SettingsPanel";
 import "./GymScene.css";
 
 const WALK_MS = 550;
 
 export function GymScene() {
   const goToScene = useGameStore((s) => s.goToScene);
-  const [penelopePos, setPenelopePos] = useState(0.1);
+  // Starts just beside (not directly on top of) the Floor zone so her
+  // figure doesn't cover that zone's label at first glance.
+  const [penelopePos, setPenelopePos] = useState(0.15);
   const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const walkTimeout = useRef<number | null>(null);
 
@@ -48,7 +52,16 @@ export function GymScene() {
           <StarCounter />
           <PointCounter />
         </div>
-        <SoundToggle />
+        <div className="gym-scene__hud-right">
+          <SoundToggle />
+          <button
+            className="gym-scene__settings-btn"
+            onClick={() => setShowSettings(true)}
+            aria-label="Settings"
+          >
+            ⚙️
+          </button>
+        </div>
       </header>
 
       <div className="gym-scene__world touch-scroll" ref={trackRef}>
@@ -143,6 +156,8 @@ export function GymScene() {
           onClose={() => setSelectedFriendId(null)}
         />
       )}
+
+      {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
     </div>
   );
 }

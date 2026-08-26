@@ -278,6 +278,66 @@ async function testSoundToggleAndAudioPlayback() {
   });
 }
 
+async function testSettingsResetAndDevMode() {
+  await withPage(async (page, pageErrors) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    await page.getByText("PLAY", { exact: false }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+
+    await page.evaluate(() => document.querySelector(".gym-scene__settings-btn").click());
+    await page.locator(".settings-panel").waitFor({ timeout: 3000 });
+
+    // Reset requires an explicit confirm step — cancel must not reset.
+    await page.evaluate(() =>
+      [...document.querySelectorAll("button")]
+        .find((b) => b.textContent.includes("Reset Progress"))
+        .click(),
+    );
+    await page.locator(".settings-panel__confirm").waitFor({ timeout: 3000 });
+    await page.evaluate(() =>
+      [...document.querySelectorAll("button")].find((b) => b.textContent.includes("Cancel")).click(),
+    );
+    await page.waitForTimeout(150);
+    let stillOnGym = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("penelopes-sparkle-gym-save")).state.hasPlayedBefore,
+    );
+    assert.equal(stillOnGym, true, "cancel does not reset progress");
+
+    // Dev mode is hidden behind 5 taps on the version line.
+    for (let i = 0; i < 5; i++) {
+      await page.evaluate(() => document.querySelector(".settings-panel__version").click());
+    }
+    await page.locator(".dev-panel").waitFor({ timeout: 3000 });
+    await page.evaluate(() =>
+      [...document.querySelectorAll("button")].find((b) => b.textContent.includes("+100 Stars")).click(),
+    );
+    await page.waitForTimeout(150);
+    const stars = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("penelopes-sparkle-gym-save")).state.stars,
+    );
+    assert.equal(stars, 100, "dev panel star shortcut works");
+
+    // Now actually confirm a reset and verify it takes effect.
+    await page.evaluate(() =>
+      [...document.querySelectorAll("button")]
+        .find((b) => b.textContent.includes("Reset Progress"))
+        .click(),
+    );
+    await page.evaluate(() =>
+      [...document.querySelectorAll("button")].find((b) => b.textContent.includes("Yes, Reset")).click(),
+    );
+    await page.locator(".title-screen").waitFor({ timeout: 3000 });
+    const afterReset = JSON.parse(
+      await page.evaluate(() => localStorage.getItem("penelopes-sparkle-gym-save")),
+    );
+    assert.equal(afterReset.state.stars, 0, "confirmed reset clears stars");
+    assert.equal(afterReset.state.hasPlayedBefore, false, "confirmed reset returns to title screen");
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: settings reset requires confirmation, dev mode unlock works");
+  });
+}
+
 const tests = [
   testCoreLoop,
   testReturningPlayer,
@@ -286,6 +346,7 @@ const tests = [
   testSoundToggleAndAudioPlayback,
   testFriendInteraction,
   testWorldFeatures,
+  testSettingsResetAndDevMode,
 ];
 let failed = false;
 for (const t of tests) {

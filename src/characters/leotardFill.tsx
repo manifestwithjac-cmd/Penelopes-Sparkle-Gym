@@ -11,20 +11,6 @@ const MOTIF_EMOJI: Record<string, string> = {
   butterfly: "🦋",
 };
 
-/** Returns the `fill` attribute value to use on the leotard shape. */
-export function leotardFillRef(pattern: LeotardPattern, uid: string): string {
-  switch (pattern.kind) {
-    case "solid":
-      return pattern.color;
-    case "gradient":
-      return `url(#leo-grad-${uid})`;
-    case "sparkle":
-      return pattern.base;
-    case "print":
-      return pattern.base;
-  }
-}
-
 /**
  * SVG placeholder rendering for a leotard pattern: solid fills are trivial,
  * gradients get a <linearGradient> def, sparkle/print add a few small

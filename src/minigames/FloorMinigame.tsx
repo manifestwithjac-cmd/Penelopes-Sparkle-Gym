@@ -4,6 +4,7 @@ import { TRICKS_BY_ID } from "../data/tricks";
 import { TrickPicker } from "./shared/TrickPicker";
 import { TapTarget } from "./shared/TapTarget";
 import { ResultPanel } from "./shared/ResultPanel";
+import { SpiderCartwheelSequence } from "./SpiderCartwheelSequence";
 import { BigButton } from "../components/ui/BigButton";
 import { summarizeAttempt, type PerformanceTier } from "../utils/scoring";
 import "./shared/minigame.css";
@@ -65,38 +66,44 @@ export function FloorMinigame() {
     <div className="minigame">
       <TrickPicker apparatusId="floor" selectedTrickId={trickId} onSelect={setTrickId} />
 
-      <div className="minigame__stage">
-        {phase === "ready" && (
-          <div className="minigame__prompt">
-            <p className="minigame__hint">Tap the stars as {trick?.name} happens!</p>
-            <BigButton size="xl" variant="primary" onClick={startAttempt}>
-              GO! 🤸
-            </BigButton>
-          </div>
-        )}
+      {trickId === "spider_cartwheel" ? (
+        <div className="minigame__stage">
+          <SpiderCartwheelSequence />
+        </div>
+      ) : (
+        <div className="minigame__stage">
+          {phase === "ready" && (
+            <div className="minigame__prompt">
+              <p className="minigame__hint">Tap the stars as {trick?.name} happens!</p>
+              <BigButton size="xl" variant="primary" onClick={startAttempt}>
+                GO! 🤸
+              </BigButton>
+            </div>
+          )}
 
-        {phase === "playing" && (
-          <div className={trickId === "helicopter_cartwheel" ? "floor-stage--helicopter" : ""}>
-            <TapTarget
-              spawnKey={stepIndex}
-              durationMs={STEP_DURATION_MS}
-              glyph={trick?.icon}
-              x={spot.x}
-              y={spot.y}
-              onResolve={handleStepResolved}
+          {phase === "playing" && (
+            <div className={trickId === "helicopter_cartwheel" ? "floor-stage--helicopter" : ""}>
+              <TapTarget
+                spawnKey={stepIndex}
+                durationMs={STEP_DURATION_MS}
+                glyph={trick?.icon}
+                x={spot.x}
+                y={spot.y}
+                onResolve={handleStepResolved}
+              />
+            </div>
+          )}
+
+          {phase === "result" && outcome && (
+            <ResultPanel
+              tier={outcome.tier}
+              starsGained={outcome.starsGained}
+              pointsGained={outcome.pointsGained}
+              onRetry={startAttempt}
             />
-          </div>
-        )}
-
-        {phase === "result" && outcome && (
-          <ResultPanel
-            tier={outcome.tier}
-            starsGained={outcome.starsGained}
-            pointsGained={outcome.pointsGained}
-            onRetry={startAttempt}
-          />
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

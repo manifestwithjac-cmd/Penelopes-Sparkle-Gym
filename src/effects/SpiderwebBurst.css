@@ -1,0 +1,31 @@
+.spiderweb-burst {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: min(80vw, 360px);
+  height: min(80vw, 360px);
+  pointer-events: none;
+  animation: webPop 700ms var(--ease-bounce) forwards;
+}
+
+@keyframes webPop {
+  0% {
+    transform: scale(0.2) rotate(-20deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spiderweb-burst {
+    animation: none;
+    opacity: 0.9;
+  }
+}

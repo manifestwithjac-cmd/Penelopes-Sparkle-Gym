@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { PenelopeRig } from "./character/PenelopeRig";
-import { GltfPenelopeRig } from "./character/GltfPenelopeRig";
-import { CANDIDATE_A_BONE_MAP } from "./character/gltfBoneMap";
-import { CANDIDATE_C_GLB_BONE_MAP } from "./character/mixamoGlbBoneMap";
 import { useCharacterRig } from "./character/useCharacterRig";
 import { usePlayTrick } from "./animation/usePlayTrick";
 import { GymEnvironment } from "./scenes/GymEnvironment";
@@ -17,13 +14,6 @@ import { TRICKS } from "./animation/tricks";
 const PENELOPE_HAIR = "#9c6b3e";
 const PENELOPE_SKIN = "#f4c9a0";
 const CARTWHEEL_END_POSITION: [number, number, number] = [0.34, 1.1, 0.4];
-
-// Validation-only escape hatch (?candidate-rig=a) for evaluating a rigged
-// GLB character candidate inside the real game — camera, gym, trick
-// system untouched. Procedural PenelopeRig stays the default; nothing
-// here changes what a normal player sees. See gltfBoneMap.ts.
-const CANDIDATE_RIG =
-  typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("candidate-rig") : null;
 
 function PenelopeSceneActor() {
   const rig = useCharacterRig();
@@ -55,35 +45,7 @@ function PenelopeSceneActor() {
 
   return (
     <>
-      {CANDIDATE_RIG === "a" ? (
-        <GltfPenelopeRig
-          rig={rig}
-          url="/candidate-preview/candidate-a.glb"
-          boneMap={CANDIDATE_A_BONE_MAP}
-          facingYaw={Math.PI}
-        />
-      ) : CANDIDATE_RIG === "c" ? (
-        <GltfPenelopeRig
-          rig={rig}
-          url="/candidate-preview/c-colored/StylizedGirl-colored.glb"
-          boneMap={CANDIDATE_C_GLB_BONE_MAP}
-          hipBoneName="mixamorigHips"
-          // Candidate C's skeleton binds in a T-pose (arms held out
-          // horizontally) rather than our procedural rig's arms-down
-          // default that REST_POSE's small shoulder deltas were authored
-          // against — bring the bind pose itself down to sides first.
-          restCorrections={{
-            shoulderL: { x: 1.4 },
-            shoulderR: { x: 1.4 },
-          }}
-          // Set only by a self-contained single-page preview build (see
-          // GltfPenelopeRig.tsx) that embeds the GLB bytes directly rather
-          // than serving this file over HTTP — never set in the real game.
-          arrayBuffer={(window as unknown as { __CANDIDATE_C_ARRAY_BUFFER?: ArrayBuffer }).__CANDIDATE_C_ARRAY_BUFFER}
-        />
-      ) : (
-        <PenelopeRig rig={rig} leotard={leotard} hairColor={PENELOPE_HAIR} skinTone={PENELOPE_SKIN} />
-      )}
+      <PenelopeRig rig={rig} leotard={leotard} hairColor={PENELOPE_HAIR} skinTone={PENELOPE_SKIN} />
       <StarBurst3D triggerKey={burstKey} position={CARTWHEEL_END_POSITION} />
     </>
   );

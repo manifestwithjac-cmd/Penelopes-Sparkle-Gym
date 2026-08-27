@@ -17,8 +17,11 @@ function pickLine(lines: string[], seed: number): string {
 
 export function FriendPopup({ friend, onClose }: { friend: FriendDef; onClose: () => void }) {
   const completedChallengeIds = useGameStore((s) => s.completedChallengeIds);
+  const companionFriendId = useGameStore((s) => s.companionFriendId);
+  const setCompanionFriend = useGameStore((s) => s.setCompanionFriend);
   const [highFived, setHighFived] = useState(false);
   const [seed] = useState(() => Math.floor(Math.random() * 1000));
+  const isCompanion = companionFriendId === friend.id;
 
   const friendChallenges = useMemo(
     () => CHALLENGES.filter((c) => c.friendId === friend.id),
@@ -73,9 +76,19 @@ export function FriendPopup({ friend, onClose }: { friend: FriendDef; onClose: (
         )}
         {allDone && <p className="friend-popup__done">All caught up! 🎉</p>}
 
-        <BigButton size="lg" variant="gold" onClick={handleHighFive}>
-          High Five! ✋
-        </BigButton>
+        <div className="friend-popup__actions">
+          <BigButton size="lg" variant="gold" onClick={handleHighFive}>
+            High Five! ✋
+          </BigButton>
+          <BigButton
+            size="lg"
+            variant={isCompanion ? "secondary" : "primary"}
+            icon={isCompanion ? "🏠" : "🤸"}
+            onClick={() => setCompanionFriend(friend.id)}
+          >
+            {isCompanion ? "Send Home" : "Bring to Gym"}
+          </BigButton>
+        </div>
       </div>
     </div>
   );

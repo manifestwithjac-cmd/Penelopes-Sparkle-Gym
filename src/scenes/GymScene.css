@@ -21,6 +21,25 @@
   z-index: 2;
 }
 
+.gym-scene__companion {
+  position: absolute;
+  left: calc(50% + min(30vw, 135px));
+  bottom: 18%;
+  transform: translateX(-50%);
+  width: min(30vw, 135px);
+  z-index: 2;
+  /* This scene's own pointer-events:none (see .gym-scene above) only gets
+     reset back to auto for .gym-scene__hud's subtree — this button is a
+     sibling of that, so it needs its own opt-in or a real tap would pass
+     straight through to the 3D canvas underneath it. */
+  pointer-events: auto;
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.gym-scene__companion:active {
+  transform: translateX(-50%) scale(0.94);
+}
+
 .gym-scene__hud,
 .gym-scene__hud * ,
 .apparatus-nav {

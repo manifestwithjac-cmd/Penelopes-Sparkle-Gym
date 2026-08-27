@@ -10,6 +10,7 @@ import "./LoungeScene.css";
 
 export function LoungeScene() {
   const goToScene = useGameStore((s) => s.goToScene);
+  const companionFriendId = useGameStore((s) => s.companionFriendId);
   const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
 
   return (
@@ -35,6 +36,9 @@ export function LoungeScene() {
             className="lounge-scene__friend"
             onClick={() => setSelectedFriendId(friend.id)}
           >
+            {companionFriendId === friend.id && (
+              <span className="lounge-scene__friend-badge">🤸 With you</span>
+            )}
             <GymnastFigure
               uid={`lounge-${friend.id}`}
               hairColor={friend.hairColor}

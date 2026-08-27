@@ -7,6 +7,13 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-5);
+  /* Same fix as WorldMenu.css's .world-menu-layer — this is now also
+     rendered from inside GymScene (the companion tap), which sets
+     pointer-events:none on itself for the transparent 3D-canvas overlay;
+     without this, every button here would silently eat no real taps
+     whenever this popup is opened from the gym (it only ever worked from
+     LoungeScene, which has no such ancestor). */
+  pointer-events: auto;
 }
 
 .friend-popup {
@@ -45,6 +52,11 @@
   background: var(--pink-50);
   font-size: 1.1rem;
   color: var(--color-primary-strong);
+  /* .friend-popup__stage below is also position:relative (needed for its
+     own absolutely-positioned StarBurst child) and comes later in the DOM
+     — same z-index "auto" stacking level, so without this it paints on
+     top and silently swallows real taps aimed at this corner. */
+  z-index: 2;
 }
 
 .friend-popup__stage {
@@ -92,4 +104,14 @@
 .friend-popup__done {
   font-weight: 700;
   color: var(--color-success);
+}
+
+.friend-popup__actions {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.friend-popup__actions .big-button {
+  flex: 1;
 }

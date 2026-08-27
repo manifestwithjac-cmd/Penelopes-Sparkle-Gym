@@ -53,6 +53,7 @@ interface GameState {
   soundOn: boolean;
   reducedMotion: boolean;
   hasPlayedBefore: boolean;
+  companionFriendId: string | null;
 
   // ---- transient (not persisted) ----
   scene: SceneId;
@@ -66,6 +67,7 @@ interface GameState {
   recordTrickResult: (input: TrickResultInput) => TrickResultOutcome;
   visitApparatus: (apparatusId: ApparatusId) => void;
   equipLeotard: (leotardId: string) => void;
+  setCompanionFriend: (friendId: string | null) => void;
   toggleSound: () => void;
   setReducedMotion: (value: boolean) => void;
   dismissCelebration: (id: string) => void;
@@ -184,6 +186,7 @@ export const useGameStore = create<GameState>()(
       soundOn: true,
       reducedMotion: false,
       hasPlayedBefore: false,
+      companionFriendId: null,
 
       scene: "title",
       sceneParam: null,
@@ -255,6 +258,9 @@ export const useGameStore = create<GameState>()(
         set({ equippedLeotardId: leotardId });
       },
 
+      setCompanionFriend: (friendId) =>
+        set((prev) => ({ companionFriendId: prev.companionFriendId === friendId ? null : friendId })),
+
       toggleSound: () => set((prev) => ({ soundOn: !prev.soundOn })),
       setReducedMotion: (value) => set({ reducedMotion: value }),
 
@@ -272,6 +278,7 @@ export const useGameStore = create<GameState>()(
           completedChallengeIds: [],
           equippedLeotardId: "pink_starter",
           hasPlayedBefore: false,
+          companionFriendId: null,
           scene: "title",
           sceneParam: null,
           celebrationQueue: [],
@@ -307,6 +314,7 @@ export const useGameStore = create<GameState>()(
         soundOn: state.soundOn,
         reducedMotion: state.reducedMotion,
         hasPlayedBefore: state.hasPlayedBefore,
+        companionFriendId: state.companionFriendId,
       }),
       onRehydrateStorage: () => (state) => {
         // Returning players land straight back in the gym, not the title

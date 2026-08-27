@@ -78,6 +78,18 @@
   transform: scale(0.94);
 }
 
+.lounge-scene__friend-badge {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.65rem;
+  color: var(--white);
+  background: var(--purple-500, #8438e0);
+  padding: 2px 8px;
+  border-radius: var(--radius-round);
+  box-shadow: var(--shadow-soft);
+  white-space: nowrap;
+}
+
 .lounge-scene__friend-name {
   font-family: var(--font-display);
   font-weight: 800;

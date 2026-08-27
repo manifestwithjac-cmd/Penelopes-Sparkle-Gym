@@ -28,14 +28,6 @@ export interface JointTransform2D {
   /** Root joint only. */
   x?: number;
   y?: number;
-  /** Root joint only, default 1. A forward tumble (somersault, walkover)
-   * rotates around an axis pointing at the camera — an axis a flat
-   * front-facing cutout has no way to actually show (no side/back art,
-   * no perspective). Dipping this toward ~0.5 through the tumble and
-   * back to 1 at the ends fakes the foreshortening a real front-to-back
-   * roll would have, the standard 2D "squash" trick for suggesting
-   * rotation toward/away from the viewer instead of a flat spin. */
-  scaleY?: number;
 }
 
 export type Pose2D = Partial<Record<JointName2D, JointTransform2D>>;
@@ -49,7 +41,7 @@ export const ROOT_PIVOT = { x: 50, y: 80 };
  * rest angles of the original static GymnastFigure.tsx so she reads as
  * the same character standing still. */
 export const REST_POSE_2D: Required<Pick<Pose2D, (typeof JOINT_NAMES_2D)[number]>> = {
-  root: { x: 0, y: 0, rot: 0, scaleY: 1 },
+  root: { x: 0, y: 0, rot: 0 },
   torso: { rot: 0 },
   head: { rot: 0 },
   shoulderL: { rot: 6 },

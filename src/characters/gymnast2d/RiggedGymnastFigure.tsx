@@ -159,27 +159,40 @@ export function RiggedGymnastFigure({
         <g transform="translate(50 38)">
           <g ref={rig.head}>
             <circle cx="0" cy="0" r="26" fill={skinTone} />
-            {/* hair (back) */}
-            <path
-              d="M-28,-2 Q-30,-28 0,-28 Q30,-28 28,-2 Q28,10 22,12 Q26,-10 0,-14 Q-26,-10 -22,12 Q-28,10 -28,-2 Z"
-              fill={hairColor}
-            />
             {/* hair (side strands, a little longer — falls past the jaw
-                toward the shoulders instead of stopping at the head) */}
+                toward the shoulders instead of stopping at the head) —
+                visible from both front and back, so outside the toggle. */}
             <rect x="-27" y="2" width="9" height="32" rx="4.5" fill={hairColor} />
             <rect x="18" y="2" width="9" height="32" rx="4.5" fill={hairColor} />
-            {/* face */}
-            <circle cx="-10" cy="2" r="4" fill={eyeColor} />
-            <circle cx="10" cy="2" r="4" fill={eyeColor} />
-            <circle cx="-8.5" cy="0.5" r="1.3" fill="#ffffff" />
-            <circle cx="11.5" cy="0.5" r="1.3" fill="#ffffff" />
-            <g fill="var(--purple-300, #b285ff)" opacity="0.85">
-              <path d="M-16,-6 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
-              <path d="M12,-6 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
+
+            {/* Front (face) and back (hair) of the head, toggled by
+                applyPose2D based on root's current rotation — mid-spin,
+                a cartwheel/somersault genuinely shows the back of her
+                head partway through, not her face at every angle, which
+                is what a single always-visible face art would do. */}
+            <g className="head-front">
+              <path
+                d="M-28,-2 Q-30,-28 0,-28 Q30,-28 28,-2 Q28,10 22,12 Q26,-10 0,-14 Q-26,-10 -22,12 Q-28,10 -28,-2 Z"
+                fill={hairColor}
+              />
+              <circle cx="-10" cy="2" r="4" fill={eyeColor} />
+              <circle cx="10" cy="2" r="4" fill={eyeColor} />
+              <circle cx="-8.5" cy="0.5" r="1.3" fill="#ffffff" />
+              <circle cx="11.5" cy="0.5" r="1.3" fill="#ffffff" />
+              <g fill="var(--purple-300, #b285ff)" opacity="0.85">
+                <path d="M-16,-6 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
+                <path d="M12,-6 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
+              </g>
+              <path d="M-7,10 Q0,15 7,10" stroke="#7a4a2b" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <circle cx="-16" cy="8" r="3.4" fill="#ff8cc6" opacity="0.55" />
+              <circle cx="16" cy="8" r="3.4" fill="#ff8cc6" opacity="0.55" />
             </g>
-            <path d="M-7,10 Q0,15 7,10" stroke="#7a4a2b" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <circle cx="-16" cy="8" r="3.4" fill="#ff8cc6" opacity="0.55" />
-            <circle cx="16" cy="8" r="3.4" fill="#ff8cc6" opacity="0.55" />
+            <g className="head-back" style={{ display: "none" }}>
+              <circle cx="0" cy="0" r="26" fill={hairColor} />
+              <path d="M0,-24 Q4,0 0,20" stroke="#000" strokeOpacity="0.12" strokeWidth="1.5" fill="none" />
+              <path d="M-14,-18 Q-8,-2 -14,16" stroke="#000" strokeOpacity="0.08" strokeWidth="1.5" fill="none" />
+              <path d="M14,-18 Q8,-2 14,16" stroke="#000" strokeOpacity="0.08" strokeWidth="1.5" fill="none" />
+            </g>
           </g>
         </g>
 

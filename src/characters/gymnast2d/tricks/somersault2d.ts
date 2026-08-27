@@ -2,16 +2,15 @@ import type { TrickAnimationDef2D } from "../poseUtils2d";
 import { easeInOutQuad2D, easeOutBack2D, linear2D } from "../poseUtils2d";
 
 /**
- * A forward tuck roll AWAY from the camera, not an in-plane spin. A real
- * somersault rotates around an axis pointing straight at the viewer —
- * an axis this flat front-facing cutout has no art or perspective to
- * actually depict (unlike Cartwheel, whose sideways wheel really does
- * rotate in the plane you're viewing it from, which is why that one
- * keeps its root.rot spin). Root barely rotates here at all; instead
- * root.scaleY squashes down toward the middle of the roll — the classic
- * 2D "squash" trick for suggesting a body tipping away from/back toward
- * the camera — while the tuck itself (knees pulled up together, arms
- * wrapped in) still does the work of reading as a curled, rolling ball.
+ * A forward tuck roll: unlike cartwheel2d.ts's wide-open starfish spin,
+ * a somersault stays curled up small the whole way around — both knees
+ * pulled up together (not splayed apart) and both arms wrapped in tight
+ * — so root still spins a full 360° and travels forward, but the
+ * silhouette reads as a compact tumbling ball instead of a spread cross.
+ * RiggedGymnastFigure's head has a real back-of-head view that swaps in
+ * automatically partway through root's rotation (see poseUtils2d.ts's
+ * applyPose2D), so the spin itself now reads as an actual roll rather
+ * than the same face staying visible at every angle.
  */
 export const SOMERSAULT_2D: TrickAnimationDef2D = {
   id: "somersault",
@@ -22,7 +21,7 @@ export const SOMERSAULT_2D: TrickAnimationDef2D = {
       label: "ready",
       ease: easeInOutQuad2D,
       pose: {
-        root: { x: -14, y: 0, rot: 0, scaleY: 1 },
+        root: { x: -14, y: 0, rot: 0 },
         shoulderL: { rot: 6 },
         shoulderR: { rot: -6 },
         hipL: { rot: 2 },
@@ -34,7 +33,7 @@ export const SOMERSAULT_2D: TrickAnimationDef2D = {
       label: "crouch",
       ease: easeInOutQuad2D,
       pose: {
-        root: { x: -11, y: 9, rot: 0, scaleY: 0.85 },
+        root: { x: -11, y: 10, rot: 0 },
         shoulderL: { rot: 40 },
         shoulderR: { rot: -40 },
         elbowL: { rot: 60 },
@@ -50,7 +49,7 @@ export const SOMERSAULT_2D: TrickAnimationDef2D = {
       label: "tuck-roll-1",
       ease: linear2D,
       pose: {
-        root: { x: -4, y: 5, rot: -8, scaleY: 0.48 },
+        root: { x: -4, y: 4, rot: -130 },
         shoulderL: { rot: 55 },
         shoulderR: { rot: -55 },
         elbowL: { rot: 85 },
@@ -66,7 +65,7 @@ export const SOMERSAULT_2D: TrickAnimationDef2D = {
       label: "tuck-roll-2",
       ease: linear2D,
       pose: {
-        root: { x: 3, y: 5, rot: 8, scaleY: 0.46 },
+        root: { x: 3, y: 4, rot: -230 },
         shoulderL: { rot: 55 },
         shoulderR: { rot: -55 },
         elbowL: { rot: 85 },
@@ -82,7 +81,7 @@ export const SOMERSAULT_2D: TrickAnimationDef2D = {
       label: "unfold",
       ease: linear2D,
       pose: {
-        root: { x: 9, y: 6, rot: 0, scaleY: 0.78 },
+        root: { x: 9, y: 6, rot: -335 },
         shoulderL: { rot: 30 },
         shoulderR: { rot: -30 },
         elbowL: { rot: 30 },
@@ -98,7 +97,7 @@ export const SOMERSAULT_2D: TrickAnimationDef2D = {
       label: "stand",
       ease: easeInOutQuad2D,
       pose: {
-        root: { x: 13, y: 2, rot: 0, scaleY: 1 },
+        root: { x: 13, y: 2, rot: -360 },
         shoulderL: { rot: 20 },
         shoulderR: { rot: -20 },
         elbowL: { rot: 6 },
@@ -114,7 +113,7 @@ export const SOMERSAULT_2D: TrickAnimationDef2D = {
       label: "celebrate",
       ease: easeOutBack2D,
       pose: {
-        root: { x: 13, y: -6, rot: 0, scaleY: 1 },
+        root: { x: 13, y: -6, rot: -360 },
         shoulderL: { rot: 130 },
         shoulderR: { rot: -130 },
         hipL: { rot: 2 },

@@ -5,7 +5,6 @@ interface ResolvedTransform2D {
   rot: number;
   x: number;
   y: number;
-  scaleY: number;
 }
 export type ResolvedPose2D = Record<(typeof JOINT_NAMES_2D)[number], ResolvedTransform2D>;
 
@@ -25,7 +24,7 @@ export interface TrickAnimationDef2D {
   keyframes: Keyframe2D[];
 }
 
-const ZERO: ResolvedTransform2D = { rot: 0, x: 0, y: 0, scaleY: 1 };
+const ZERO: ResolvedTransform2D = { rot: 0, x: 0, y: 0 };
 
 /** Fills a partial, hand-authored pose out to every joint using
  * REST_POSE_2D as the default — same fan-out pattern as the old 3D
@@ -39,7 +38,6 @@ export function resolvePose2D(overrides: Pose2D): ResolvedPose2D {
       rot: override?.rot ?? rest.rot ?? 0,
       x: override?.x ?? rest.x ?? 0,
       y: override?.y ?? rest.y ?? 0,
-      scaleY: override?.scaleY ?? rest.scaleY ?? 1,
     };
   }
   return resolved;
@@ -60,12 +58,7 @@ function lerp(a: number, b: number, t: number): number {
 }
 
 function lerpTransform2D(a: ResolvedTransform2D, b: ResolvedTransform2D, t: number): ResolvedTransform2D {
-  return {
-    rot: lerp(a.rot, b.rot, t),
-    x: lerp(a.x, b.x, t),
-    y: lerp(a.y, b.y, t),
-    scaleY: lerp(a.scaleY, b.scaleY, t),
-  };
+  return { rot: lerp(a.rot, b.rot, t), x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t) };
 }
 
 /** Given resolved keyframe poses + their t-breakpoints, find the pose at
@@ -94,6 +87,15 @@ export function samplePoseAt2D(
   return out;
 }
 
+/** A cartwheel/somersault/walkover genuinely shows the back of her head
+ * partway through a real rotation — root.rot past ~90° and short of
+ * ~270° means she's turned more than a quarter-spin away from the
+ * camera, which anatomically shows the back of the head, not the face. */
+function isFacingBack(rootRotDeg: number): boolean {
+  const norm = ((rootRotDeg % 360) + 360) % 360;
+  return norm > 90 && norm < 270;
+}
+
 /** Writes a resolved pose straight into the rig's SVGGElement refs via the
  * `transform` attribute — imperative, no React state, so a fast trick
  * animation never triggers a re-render. */
@@ -103,20 +105,16 @@ export function applyPose2D(rig: RigRefs2D, pose: ResolvedPose2D) {
     if (!el) continue;
     const t = pose[name];
     if (name === "root") {
-      // scale() has no center parameter, so compose one by translating
-      // to ROOT_PIVOT, scaling, then translating back — same pivot the
-      // rotate() above already uses, so a squash never shifts her
-      // apparent position on the mat.
-      const scalePart =
-        t.scaleY === 1
-          ? ""
-          : ` translate(${ROOT_PIVOT.x} ${ROOT_PIVOT.y}) scale(1 ${t.scaleY}) translate(${-ROOT_PIVOT.x} ${-ROOT_PIVOT.y})`;
-      el.setAttribute(
-        "transform",
-        `translate(${t.x} ${t.y}) rotate(${t.rot} ${ROOT_PIVOT.x} ${ROOT_PIVOT.y})${scalePart}`,
-      );
+      el.setAttribute("transform", `translate(${t.x} ${t.y}) rotate(${t.rot} ${ROOT_PIVOT.x} ${ROOT_PIVOT.y})`);
     } else {
       el.setAttribute("transform", `rotate(${t.rot})`);
+      if (name === "head") {
+        const facingBack = isFacingBack(pose.root.rot);
+        const front = el.querySelector<SVGElement>(".head-front");
+        const back = el.querySelector<SVGElement>(".head-back");
+        if (front) front.style.display = facingBack ? "none" : "";
+        if (back) back.style.display = facingBack ? "" : "none";
+      }
     }
   }
 }

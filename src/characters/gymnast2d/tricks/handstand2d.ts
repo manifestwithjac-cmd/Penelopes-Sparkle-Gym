@@ -5,10 +5,16 @@ import { easeInOutQuad2D, easeOutBack2D, linear2D } from "../poseUtils2d";
  * Kicks up to a HALF root rotation (180°, not the full 360° wheel a
  * cartwheel/somersault does) and holds there — legs stay together
  * (straight, near their rest angle) rather than splitting or splaying,
- * since root's own rotation is what carries them "up"; arms stay close
- * to their rest angle too, since they're the ones bearing weight/planted
- * rather than flying free. The hold spans a real chunk of the timeline
- * (t 0.35-0.65) so it reads as "balancing," not a blink-and-miss beat.
+ * since root's own rotation is what carries them "up." Arms, though,
+ * rotate almost all the way around (~175°, nearly the reverse of their
+ * hanging-at-the-side rest angle) so that once root's own -180° flip is
+ * applied, they end up extending straight past her head toward the
+ * ground — reading as planted, weight-bearing arms, not arms left
+ * hanging at her sides (which is what kept this looking like a headstand
+ * instead of a handstand). Elbows stay near their straight rest angle for
+ * a rigid, weight-bearing line. The hold spans a real chunk of the
+ * timeline (t 0.35-0.65) so it reads as "balancing," not a blink-and-miss
+ * beat.
  */
 export const HANDSTAND_2D: TrickAnimationDef2D = {
   id: "handstand",
@@ -32,8 +38,10 @@ export const HANDSTAND_2D: TrickAnimationDef2D = {
       ease: easeInOutQuad2D,
       pose: {
         root: { x: -6, y: 2, rot: -90 },
-        shoulderL: { rot: 20 },
-        shoulderR: { rot: -20 },
+        shoulderL: { rot: 95 },
+        shoulderR: { rot: -95 },
+        elbowL: { rot: 10 },
+        elbowR: { rot: -10 },
         hipL: { rot: -20 },
         hipR: { rot: 40 },
         kneeR: { rot: 25 },
@@ -45,8 +53,10 @@ export const HANDSTAND_2D: TrickAnimationDef2D = {
       ease: easeInOutQuad2D,
       pose: {
         root: { x: -2, y: -4, rot: -178 },
-        shoulderL: { rot: 8 },
-        shoulderR: { rot: -8 },
+        shoulderL: { rot: 172 },
+        shoulderR: { rot: -172 },
+        elbowL: { rot: 4 },
+        elbowR: { rot: -4 },
         hipL: { rot: -4 },
         hipR: { rot: 4 },
       },
@@ -57,8 +67,10 @@ export const HANDSTAND_2D: TrickAnimationDef2D = {
       ease: easeInOutQuad2D,
       pose: {
         root: { x: 0, y: -4, rot: -182 },
-        shoulderL: { rot: 4 },
-        shoulderR: { rot: -4 },
+        shoulderL: { rot: 176 },
+        shoulderR: { rot: -176 },
+        elbowL: { rot: 2 },
+        elbowR: { rot: -2 },
         hipL: { rot: 4 },
         hipR: { rot: -4 },
       },
@@ -69,8 +81,10 @@ export const HANDSTAND_2D: TrickAnimationDef2D = {
       ease: linear2D,
       pose: {
         root: { x: 2, y: -4, rot: -178 },
-        shoulderL: { rot: 8 },
-        shoulderR: { rot: -8 },
+        shoulderL: { rot: 172 },
+        shoulderR: { rot: -172 },
+        elbowL: { rot: 4 },
+        elbowR: { rot: -4 },
         hipL: { rot: -3 },
         hipR: { rot: 3 },
       },
@@ -81,8 +95,10 @@ export const HANDSTAND_2D: TrickAnimationDef2D = {
       ease: easeInOutQuad2D,
       pose: {
         root: { x: 6, y: 2, rot: -90 },
-        shoulderL: { rot: 20 },
-        shoulderR: { rot: -20 },
+        shoulderL: { rot: 95 },
+        shoulderR: { rot: -95 },
+        elbowL: { rot: 10 },
+        elbowR: { rot: -10 },
         hipL: { rot: 40 },
         hipR: { rot: -20 },
         kneeL: { rot: 25 },

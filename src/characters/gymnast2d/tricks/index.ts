@@ -7,6 +7,7 @@ import { BACKBEND_2D } from "./backbend2d";
 import { SPLIT_JUMP_2D } from "./splitJump2d";
 import { ROUND_OFF_2D } from "./roundOff2d";
 import { FRONT_WALKOVER_2D } from "./frontWalkover2d";
+import { BACK_WALKOVER_2D } from "./backWalkover2d";
 
 /**
  * Registry of trick id -> flat-2D animation. Only tricks listed here get
@@ -24,4 +25,5 @@ export const TRICKS_2D: Record<string, TrickAnimationDef2D> = {
   split_jump: SPLIT_JUMP_2D,
   round_off: ROUND_OFF_2D,
   front_walkover: FRONT_WALKOVER_2D,
+  back_walkover: BACK_WALKOVER_2D,
 };

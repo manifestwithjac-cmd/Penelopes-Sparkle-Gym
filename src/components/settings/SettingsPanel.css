@@ -7,6 +7,10 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-5);
+  /* Same fix as WorldMenu.css's .world-menu-layer — this renders as a
+     sibling of .gym-scene__hud, not inside it, so it otherwise inherits
+     pointer-events:none from .gym-scene and silently eats no real taps. */
+  pointer-events: auto;
 }
 
 .settings-panel {

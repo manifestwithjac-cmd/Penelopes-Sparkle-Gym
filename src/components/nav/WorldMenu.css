@@ -7,6 +7,12 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-5);
+  /* GymScene.tsx renders this as a sibling of .gym-scene__hud, not inside
+     it, so without this it inherits pointer-events:none from .gym-scene
+     (set there so the transparent overlay lets clicks through to the 3D
+     canvas) — every button in here would look right but silently eat no
+     real taps. */
+  pointer-events: auto;
 }
 
 .world-menu {

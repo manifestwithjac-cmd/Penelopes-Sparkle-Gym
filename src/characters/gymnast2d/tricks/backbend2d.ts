@@ -2,10 +2,20 @@ import type { TrickAnimationDef2D } from "../poseUtils2d";
 import { easeInOutQuad2D, easeOutBack2D, linear2D } from "../poseUtils2d";
 
 /**
- * No root rotation at all — unlike every other trick, a backbend is a
- * held ARCH, not a spin or a jump. Torso and head tip back together,
- * arms reach up and back overhead, knees soften, and she holds the arch
- * before curling back up to standing.
+ * No root SPIN at all — unlike every other trick, a backbend is a held
+ * ARCH, not a wheel or a jump. Root does tip back a little (up to -12°)
+ * so the whole figure leans together rather than just her head/torso
+ * swiveling while her legs stand planted, but it never comes close to
+ * the ~90° threshold that would swap in the back-of-head view (see
+ * poseUtils2d.ts's applyPose2D) — she stays facing the camera the whole
+ * time, which is the point of this being an arch and not a walkover.
+ * Torso carries most of the arch's rotation now; head only tips a
+ * little (previously the head rotated further than the torso to fake
+ * an arch, but the head's side-hair strands are long rects offset from
+ * its pivot, so anything past ~20° of head rotation swept them out into
+ * a visible diagonal streak past her shoulder — torso has no such
+ * side-effect, so it does the heavy lifting instead). Knees soften more
+ * than before for a genuine athletic crouch under the arch.
  */
 export const BACKBEND_2D: TrickAnimationDef2D = {
   id: "backbend",
@@ -28,15 +38,15 @@ export const BACKBEND_2D: TrickAnimationDef2D = {
       label: "reach-up",
       ease: easeInOutQuad2D,
       pose: {
-        root: { x: 0, y: 3, rot: 0 },
-        torso: { rot: 16 },
-        head: { rot: 18 },
-        shoulderL: { rot: 100 },
-        shoulderR: { rot: -100 },
+        root: { x: 0, y: 2, rot: -4 },
+        torso: { rot: 14 },
+        head: { rot: 8 },
+        shoulderL: { rot: 95 },
+        shoulderR: { rot: -95 },
         hipL: { rot: 4 },
         hipR: { rot: -4 },
-        kneeL: { rot: -8 },
-        kneeR: { rot: 8 },
+        kneeL: { rot: -6 },
+        kneeR: { rot: 6 },
       },
     },
     {
@@ -44,20 +54,15 @@ export const BACKBEND_2D: TrickAnimationDef2D = {
       label: "arch-1",
       ease: linear2D,
       pose: {
-        // Head rotates further than torso (matching how a real backbend
-        // drops the head back most dramatically), and root.y sinks more —
-        // pushed well past the first pass since a front-facing flat
-        // cutout can't show a true side-view arch silhouette, so the
-        // lean needs to be exaggerated to read as "backbend" at all.
-        root: { x: 3, y: 9, rot: 0 },
-        torso: { rot: 32 },
-        head: { rot: 42 },
-        shoulderL: { rot: 128 },
-        shoulderR: { rot: -128 },
+        root: { x: 2, y: 7, rot: -10 },
+        torso: { rot: 28 },
+        head: { rot: 14 },
+        shoulderL: { rot: 120 },
+        shoulderR: { rot: -120 },
         hipL: { rot: 8 },
         hipR: { rot: -8 },
-        kneeL: { rot: -20 },
-        kneeR: { rot: 20 },
+        kneeL: { rot: -18 },
+        kneeR: { rot: 18 },
       },
     },
     {
@@ -65,15 +70,15 @@ export const BACKBEND_2D: TrickAnimationDef2D = {
       label: "arch-hold",
       ease: linear2D,
       pose: {
-        root: { x: 3, y: 10, rot: 0 },
-        torso: { rot: 35 },
-        head: { rot: 46 },
-        shoulderL: { rot: 130 },
-        shoulderR: { rot: -130 },
+        root: { x: 2, y: 8, rot: -12 },
+        torso: { rot: 30 },
+        head: { rot: 16 },
+        shoulderL: { rot: 122 },
+        shoulderR: { rot: -122 },
         hipL: { rot: 8 },
         hipR: { rot: -8 },
-        kneeL: { rot: -22 },
-        kneeR: { rot: 22 },
+        kneeL: { rot: -20 },
+        kneeR: { rot: 20 },
       },
     },
     {
@@ -81,9 +86,9 @@ export const BACKBEND_2D: TrickAnimationDef2D = {
       label: "curl-back-up",
       ease: easeInOutQuad2D,
       pose: {
-        root: { x: 1, y: 1, rot: 0 },
+        root: { x: 1, y: 1, rot: -4 },
         torso: { rot: 6 },
-        head: { rot: 4 },
+        head: { rot: 3 },
         shoulderL: { rot: 40 },
         shoulderR: { rot: -40 },
         hipL: { rot: 3 },

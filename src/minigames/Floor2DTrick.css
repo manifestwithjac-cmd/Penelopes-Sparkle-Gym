@@ -4,12 +4,13 @@
   overflow: visible;
 }
 
-.floor2d__figure {
+.floor2d__figures {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-2);
   pointer-events: none;
 }
 
@@ -18,7 +19,13 @@
   height: auto;
 }
 
-/* .floor2d__figure is position: absolute, which always paints above plain
+/* With a companion along, both figures shrink to fit side by side instead
+   of one full-size cutout overlapping the other. */
+.floor2d__figures--paired .floor2d__figure svg {
+  width: min(40vw, 190px);
+}
+
+/* .floor2d__figures is position: absolute, which always paints above plain
    static-flow siblings regardless of DOM order — give the prompt/result
    panel a stacking context of their own (position: relative, no offset,
    so layout is unaffected) so their later DOM order lets them paint on

@@ -118,7 +118,17 @@ export function RiggedGymnastFigure({
             pose rotation can never share one <g> or the pose write wipes
             the placement out. */}
 
-        {/* legs (drawn first, behind the torso) */}
+        {/* torso / leotard (drawn first — legs need to paint OVER it for
+            a high kick that swings up past hip height, arms need to
+            paint over it for anything reaching across the chest) */}
+        <g transform="translate(50 62)">
+          <g ref={rig.torso}>
+            <TorsoDecor pattern={leotard} uid={uid} />
+            <path d="M-15,0 Q0,-10 15,0 L17,38 Q0,46 -17,38 Z" fill={leoFill} stroke="rgba(0,0,0,0.06)" />
+          </g>
+        </g>
+
+        {/* legs (drawn after the torso — see above) */}
         <g transform="translate(43 98)">
           <g ref={rig.hipL}>
             <rect x="-5" y="0" width="10" height="17" rx="5" fill={skinTone} />
@@ -139,14 +149,6 @@ export function RiggedGymnastFigure({
                 <ellipse cx="0" cy="17" rx="7" ry="4" fill="#ffffff" />
               </g>
             </g>
-          </g>
-        </g>
-
-        {/* torso / leotard */}
-        <g transform="translate(50 62)">
-          <g ref={rig.torso}>
-            <TorsoDecor pattern={leotard} uid={uid} />
-            <path d="M-15,0 Q0,-10 15,0 L17,38 Q0,46 -17,38 Z" fill={leoFill} stroke="rgba(0,0,0,0.06)" />
           </g>
         </g>
 

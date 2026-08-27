@@ -1,6 +1,7 @@
 import type { TrickAnimationDef2D } from "../poseUtils2d";
 import { CARTWHEEL_2D } from "./cartwheel2d";
 import { ONE_HANDED_CARTWHEEL_2D } from "./oneHandedCartwheel2d";
+import { SOMERSAULT_2D } from "./somersault2d";
 
 /**
  * Registry of trick id -> flat-2D animation. Only tricks listed here get
@@ -12,4 +13,5 @@ import { ONE_HANDED_CARTWHEEL_2D } from "./oneHandedCartwheel2d";
 export const TRICKS_2D: Record<string, TrickAnimationDef2D> = {
   cartwheel: CARTWHEEL_2D,
   one_handed_cartwheel: ONE_HANDED_CARTWHEEL_2D,
+  somersault: SOMERSAULT_2D,
 };

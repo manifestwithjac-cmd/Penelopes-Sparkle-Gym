@@ -58,10 +58,22 @@ export interface FriendDef {
   id: string;
   name: string;
   hairColor: string;
+  /** Optional thin highlight streaks over the base hair color (e.g. a
+   * couple of blonde streaks through light brown hair). Purely cosmetic —
+   * omit for a single flat hair color. */
+  hairHighlightColor?: string;
   skinTone: string;
   favoriteColor: string;
   favoriteTrickId?: string;
   outfitPattern: LeotardPattern;
+  /** Optional black knee brace/immobilizer on this leg (viewer-facing
+   * figure, so "left"/"right" is the character's own anatomical side —
+   * mirrored on screen). Cosmetic, static-figure only (see
+   * GymnastFigure.tsx) — she isn't drawn with it mid-trick. */
+  kneeBrace?: "left" | "right";
+  /** Optional pair of underarm crutches, static-figure only like
+   * kneeBrace above. */
+  crutches?: boolean;
   greetings: string[];
   cheerLines: string[];
   challengeLines: string[];

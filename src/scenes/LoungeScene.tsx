@@ -42,8 +42,11 @@ export function LoungeScene() {
             <GymnastFigure
               uid={`lounge-${friend.id}`}
               hairColor={friend.hairColor}
+              hairHighlightColor={friend.hairHighlightColor}
               skinTone={friend.skinTone}
               leotard={friend.outfitPattern}
+              kneeBrace={friend.kneeBrace}
+              crutches={friend.crutches}
               pose="bow"
             />
             <span className="lounge-scene__friend-name">{friend.name}</span>

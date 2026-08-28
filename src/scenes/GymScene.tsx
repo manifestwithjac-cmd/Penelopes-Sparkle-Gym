@@ -48,8 +48,11 @@ export function GymScene() {
           <GymnastFigure
             uid={`gym-companion-${companion.id}`}
             hairColor={companion.hairColor}
+            hairHighlightColor={companion.hairHighlightColor}
             skinTone={companion.skinTone}
             leotard={companion.outfitPattern}
+            kneeBrace={companion.kneeBrace}
+            crutches={companion.crutches}
             pose="wave"
           />
         </button>

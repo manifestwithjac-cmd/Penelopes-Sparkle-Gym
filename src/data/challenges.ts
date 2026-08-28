@@ -39,6 +39,13 @@ export const CHALLENGES: ChallengeDef[] = [
     leotardRewardId: "purple_glitter",
   },
   {
+    id: "crissy_stars",
+    friendId: "crissy",
+    prompt: "Cheer me on — earn 10 stars!",
+    goal: { type: "earnStars", count: 10 },
+    starReward: 8,
+  },
+  {
     id: "other_penelope_beam",
     friendId: "other_penelope",
     prompt: "Earn 15 stars!",

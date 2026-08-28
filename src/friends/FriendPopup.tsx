@@ -54,8 +54,11 @@ export function FriendPopup({ friend, onClose }: { friend: FriendDef; onClose: (
             <GymnastFigure
               uid={`popup-${friend.id}`}
               hairColor={friend.hairColor}
+              hairHighlightColor={friend.hairHighlightColor}
               skinTone={friend.skinTone}
               leotard={friend.outfitPattern}
+              kneeBrace={friend.kneeBrace}
+              crutches={friend.crutches}
               pose={highFived ? "cheer" : "wave"}
             />
           </div>

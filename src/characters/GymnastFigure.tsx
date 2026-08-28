@@ -8,11 +8,19 @@ export type FigurePose = "idle" | "celebrate" | "wobble" | "cheer" | "wave" | "b
 export interface GymnastFigureProps {
   uid: string;
   hairColor: string;
+  /** Optional thin highlight streaks over the base hair color. */
+  hairHighlightColor?: string;
   skinTone: string;
   leotard: LeotardPattern;
   pose?: FigurePose;
   sparkleEyes?: boolean;
   eyeColor?: string;
+  /** Optional black knee brace on this leg — the character's own
+   * anatomical side, so it's mirrored on screen ("left" renders on the
+   * viewer's right). */
+  kneeBrace?: "left" | "right";
+  /** Optional pair of underarm crutches, one on each side. */
+  crutches?: boolean;
   className?: string;
 }
 
@@ -25,14 +33,21 @@ export interface GymnastFigureProps {
 export function GymnastFigure({
   uid,
   hairColor,
+  hairHighlightColor,
   skinTone,
   leotard,
   pose = "idle",
   sparkleEyes = true,
   eyeColor = "#3d6fd6",
+  kneeBrace,
+  crutches = false,
   className = "",
 }: GymnastFigureProps) {
   const leoFill = leotardFillRef(leotard, uid);
+  // Figure faces the viewer, so her own left leg — anatomically — sits on
+  // the viewer's right (the x=52 leg below), mirrored like looking in a
+  // mirror at yourself.
+  const braceX = kneeBrace === "left" ? 49 : kneeBrace === "right" ? 35 : null;
 
   return (
     <svg
@@ -60,6 +75,34 @@ export function GymnastFigure({
         />
       </g>
 
+      {/* knee brace — almost the full leg, like a post-surgery
+          immobilizer, drawn over the leotard's lower hem so it isn't cut
+          off where the two overlap near the hip. */}
+      {braceX !== null && (
+        <g className="fig-knee-brace">
+          <rect x={braceX} y="97" width="16" height="33" rx="6" fill="#181818" />
+          <rect x={braceX - 1} y="103" width="18" height="3.5" rx="1.5" fill="#3d3d3d" />
+          <rect x={braceX - 1} y="123" width="18" height="3.5" rx="1.5" fill="#3d3d3d" />
+          <circle cx={braceX + 8} cy="113" r="3.4" fill="#8a8a8a" stroke="#555" strokeWidth="1" />
+        </g>
+      )}
+
+      {/* crutches — one on each side, drawn before the arms so her hands
+          paint over the handgrips (looks like she's actually holding
+          them) while the underarm bars and shafts stay fully visible. */}
+      {crutches && (
+        <g className="fig-crutches">
+          {/* left */}
+          <rect x="10" y="59" width="16" height="5" rx="2.5" fill="#b8b8bd" />
+          <rect x="15.5" y="59" width="5" height="76" rx="2.5" fill="#dcdce0" />
+          <rect x="10" y="89" width="16" height="5" rx="2.5" fill="#e8a6c8" />
+          {/* right */}
+          <rect x="74" y="59" width="16" height="5" rx="2.5" fill="#b8b8bd" />
+          <rect x="79.5" y="59" width="5" height="76" rx="2.5" fill="#dcdce0" />
+          <rect x="74" y="89" width="16" height="5" rx="2.5" fill="#e8a6c8" />
+        </g>
+      )}
+
       {/* arms */}
       <g className="fig-arm fig-arm-left">
         <rect x="26" y="62" width="10" height="30" rx="5" fill={skinTone} />
@@ -80,6 +123,13 @@ export function GymnastFigure({
             toward the shoulders instead of stopping at the head) */}
         <rect x="23" y="40" width="9" height="32" rx="4.5" fill={hairColor} />
         <rect x="68" y="40" width="9" height="32" rx="4.5" fill={hairColor} />
+        {/* optional lighter streaks through the hair */}
+        {hairHighlightColor && (
+          <g fill={hairHighlightColor} opacity="0.9">
+            <path d="M32,13 Q29,30 32,49 Q27,30 29,12 Z" />
+            <path d="M64,12 Q68,28 65,47 Q70,28 67,11 Z" />
+          </g>
+        )}
         {/* face */}
         <circle cx="40" cy="40" r="4" fill={eyeColor} />
         <circle cx="60" cy="40" r="4" fill={eyeColor} />

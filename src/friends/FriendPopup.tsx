@@ -57,8 +57,11 @@ export function FriendPopup({ friend, onClose }: { friend: FriendDef; onClose: (
               hairHighlightColor={friend.hairHighlightColor}
               skinTone={friend.skinTone}
               leotard={friend.outfitPattern}
+              eyeColor={friend.eyeColor}
               kneeBrace={friend.kneeBrace}
               crutches={friend.crutches}
+              isBoy={friend.isBoy}
+              scale={friend.sizeScale}
               pose={highFived ? "cheer" : "wave"}
             />
           </div>

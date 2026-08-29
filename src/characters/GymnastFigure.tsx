@@ -21,6 +21,12 @@ export interface GymnastFigureProps {
   kneeBrace?: "left" | "right";
   /** Optional pair of underarm crutches, one on each side. */
   crutches?: boolean;
+  /** Boy silhouette — shorter hair, two-piece shirt/shorts outfit instead
+   * of the default longer hair and one-piece leotard/dress, and the
+   * sparkle-eyelash decoration suppressed unless sparkleEyes is forced on. */
+  isBoy?: boolean;
+  /** Scales the whole figure down (e.g. 0.85), anchored to her feet. */
+  scale?: number;
   className?: string;
 }
 
@@ -41,6 +47,8 @@ export function GymnastFigure({
   eyeColor = "#3d6fd6",
   kneeBrace,
   crutches = false,
+  isBoy = false,
+  scale = 1,
   className = "",
 }: GymnastFigureProps) {
   const leoFill = leotardFillRef(leotard, uid);
@@ -49,7 +57,7 @@ export function GymnastFigure({
   // mirror at yourself.
   const braceX = kneeBrace === "left" ? 49 : kneeBrace === "right" ? 35 : null;
 
-  return (
+  const svg = (
     <svg
       viewBox="0 0 100 140"
       className={`gymnast-figure pose-${pose} ${className}`}
@@ -66,14 +74,23 @@ export function GymnastFigure({
         <ellipse cx="57" cy="133" rx="7" ry="4" fill="#ffffff" />
       </g>
 
-      {/* body / leotard */}
-      <g className="fig-body">
-        <path
-          d="M35,62 Q50,52 65,62 L67,100 Q50,108 33,100 Z"
-          fill={leoFill}
-          stroke="rgba(0,0,0,0.06)"
-        />
-      </g>
+      {/* body: a one-piece leotard/dress, or for a boy a two-piece
+          shirt + shorts (a boxier, less flared silhouette) — same fill
+          either way, since leotard/outfitPattern is shared. */}
+      {isBoy ? (
+        <g className="fig-body fig-body--boy">
+          <path d="M35,60 Q50,54 65,60 L64,84 Q50,88 36,84 Z" fill={leoFill} stroke="rgba(0,0,0,0.06)" />
+          <path d="M36,84 Q50,80 64,84 L66,100 Q50,105 34,100 Z" fill={leoFill} stroke="rgba(0,0,0,0.06)" />
+        </g>
+      ) : (
+        <g className="fig-body">
+          <path
+            d="M35,62 Q50,52 65,62 L67,100 Q50,108 33,100 Z"
+            fill={leoFill}
+            stroke="rgba(0,0,0,0.06)"
+          />
+        </g>
+      )}
 
       {/* knee brace — almost the full leg, like a post-surgery
           immobilizer, drawn over the leotard's lower hem so it isn't cut
@@ -114,15 +131,25 @@ export function GymnastFigure({
       {/* head */}
       <g className="fig-head">
         <circle cx="50" cy="38" r="26" fill={skinTone} />
-        {/* hair (back) */}
-        <path
-          d="M22,36 Q20,10 50,10 Q80,10 78,36 Q78,48 72,50 Q76,28 50,24 Q24,28 28,50 Q22,48 22,36 Z"
-          fill={hairColor}
-        />
-        {/* hair (side strands, a little longer — falls past the jaw
-            toward the shoulders instead of stopping at the head) */}
-        <rect x="23" y="40" width="9" height="32" rx="4.5" fill={hairColor} />
-        <rect x="68" y="40" width="9" height="32" rx="4.5" fill={hairColor} />
+        {/* hair (back) — a shorter, rounder crop for a boy instead of the
+            longer style that continues down past the jaw */}
+        {isBoy ? (
+          <path
+            d="M24,34 Q22,12 50,12 Q78,12 76,34 Q76,42 70,44 Q72,26 50,22 Q28,26 30,44 Q24,42 24,34 Z"
+            fill={hairColor}
+          />
+        ) : (
+          <>
+            <path
+              d="M22,36 Q20,10 50,10 Q80,10 78,36 Q78,48 72,50 Q76,28 50,24 Q24,28 28,50 Q22,48 22,36 Z"
+              fill={hairColor}
+            />
+            {/* hair (side strands, a little longer — falls past the jaw
+                toward the shoulders instead of stopping at the head) */}
+            <rect x="23" y="40" width="9" height="32" rx="4.5" fill={hairColor} />
+            <rect x="68" y="40" width="9" height="32" rx="4.5" fill={hairColor} />
+          </>
+        )}
         {/* optional lighter streaks through the hair */}
         {hairHighlightColor && (
           <g fill={hairHighlightColor} opacity="0.9">
@@ -135,7 +162,7 @@ export function GymnastFigure({
         <circle cx="60" cy="40" r="4" fill={eyeColor} />
         <circle cx="41.5" cy="38.5" r="1.3" fill="#ffffff" />
         <circle cx="61.5" cy="38.5" r="1.3" fill="#ffffff" />
-        {sparkleEyes && (
+        {sparkleEyes && !isBoy && (
           <g fill="var(--purple-300, #b285ff)" opacity="0.85">
             <path d="M34,32 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
             <path d="M62,32 l1,3 3,1 -3,1 -1,3 -1,-3 -3,-1 3,-1 Z" />
@@ -146,5 +173,12 @@ export function GymnastFigure({
         <circle cx="66" cy="46" r="3.4" fill="#ff8cc6" opacity="0.55" />
       </g>
     </svg>
+  );
+
+  if (scale === 1) return svg;
+  return (
+    <div style={{ width: "100%", height: "100%", transform: `scale(${scale})`, transformOrigin: "bottom center" }}>
+      {svg}
+    </div>
   );
 }

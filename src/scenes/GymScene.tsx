@@ -51,8 +51,11 @@ export function GymScene() {
             hairHighlightColor={companion.hairHighlightColor}
             skinTone={companion.skinTone}
             leotard={companion.outfitPattern}
+            eyeColor={companion.eyeColor}
             kneeBrace={companion.kneeBrace}
             crutches={companion.crutches}
+            isBoy={companion.isBoy}
+            scale={companion.sizeScale}
             pose="wave"
           />
         </button>

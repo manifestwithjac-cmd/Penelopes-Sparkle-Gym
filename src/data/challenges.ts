@@ -39,6 +39,20 @@ export const CHALLENGES: ChallengeDef[] = [
     leotardRewardId: "purple_glitter",
   },
   {
+    id: "lyla_bars",
+    friendId: "lyla",
+    prompt: "Try the bars with me!",
+    goal: { type: "visitApparatus", apparatusId: "bars", count: 1 },
+    starReward: 6,
+  },
+  {
+    id: "jackson_vault",
+    friendId: "jackson",
+    prompt: "Try the vault!",
+    goal: { type: "visitApparatus", apparatusId: "vault", count: 1 },
+    starReward: 6,
+  },
+  {
     id: "crissy_stars",
     friendId: "crissy",
     prompt: "Cheer me on — earn 10 stars!",

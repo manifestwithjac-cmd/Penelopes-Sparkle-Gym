@@ -45,8 +45,11 @@ export function LoungeScene() {
               hairHighlightColor={friend.hairHighlightColor}
               skinTone={friend.skinTone}
               leotard={friend.outfitPattern}
+              eyeColor={friend.eyeColor}
               kneeBrace={friend.kneeBrace}
               crutches={friend.crutches}
+              isBoy={friend.isBoy}
+              scale={friend.sizeScale}
               pose="bow"
             />
             <span className="lounge-scene__friend-name">{friend.name}</span>

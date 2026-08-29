@@ -63,9 +63,21 @@ export interface FriendDef {
    * omit for a single flat hair color. */
   hairHighlightColor?: string;
   skinTone: string;
+  /** Defaults to GymnastFigure's own default (blue) when omitted. */
+  eyeColor?: string;
   favoriteColor: string;
   favoriteTrickId?: string;
   outfitPattern: LeotardPattern;
+  /** Boy vs. girl silhouette — shorter hair and a two-piece shirt/shorts
+   * outfit instead of the default longer hair and one-piece leotard/dress
+   * (see GymnastFigure.tsx). Also suppresses the sparkle-eyelash
+   * decoration by default. */
+  isBoy?: boolean;
+  /** Scales the whole figure down (e.g. 0.85), anchored to her feet so
+   * she still stands on the same ground line as everyone else — for a
+   * friend who's simply smaller/younger than Penelope. Static-figure
+   * only, like kneeBrace/crutches below. */
+  sizeScale?: number;
   /** Optional black knee brace/immobilizer on this leg (viewer-facing
    * figure, so "left"/"right" is the character's own anatomical side —
    * mirrored on screen). Cosmetic, static-figure only (see

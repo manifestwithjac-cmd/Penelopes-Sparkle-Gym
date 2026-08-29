@@ -100,7 +100,7 @@ export function Floor2DTrick({ trickId }: { trickId: string }) {
                 hairColor={companion.hairColor}
                 skinTone={companion.skinTone}
                 leotard={companion.outfitPattern}
-                eyeColor="#3d6fd6"
+                eyeColor={companion.eyeColor}
               />
             </div>
           )}

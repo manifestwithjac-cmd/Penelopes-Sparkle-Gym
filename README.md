@@ -52,11 +52,19 @@ src/
   shop/         Leotard shop card rendering (dressing-room UI).
   friends/      FriendSprite (world figure) + FriendPopup (dialogue,
                 challenge status, high-five).
-  ludo/         Sparkle Ludo, the pink gymnastics board game (reached from
-                the 🗺️ world menu): ludoRules.ts is the pure board + rules
-                + computer-player logic, ludoStore.ts the saved game state,
-                LudoScene/LudoBoard the UI. Seat names/colors live in
-                data/ludoSeats.ts.
+  games/        The Game Room (🗺️ world menu → Game Room) and the kit its
+                games share: header, settings sheet, setting rows, win
+                card, friend avatars, shuffle.
+  ludo/         Sparkle Ludo, the pink gymnastics board game: ludoRules.ts
+                is the pure board + rules + computer-player logic,
+                ludoStore.ts the saved game state, LudoScene/LudoBoard the
+                UI. Seat names/colors live in data/ludoSeats.ts.
+  match/        Sparkle Match, an Uno-style color/number card game vs. a
+                computer friend (Easy/Medium/Hard, 5 or 7 cards).
+  war/          Sparkle War, the flip-and-compare card game vs. a computer
+                friend (10/20 flips or all cards, optional lucky deal).
+                Each game folder follows Ludo's split: *Rules.ts (pure),
+                *Store.ts (saved state), *Scene.tsx (UI + timing).
   audio/        Synthesized SFX + background loop (Web Audio, no sound
                 asset files) behind one `useSound()` hook.
   dev/          Developer-only shortcuts panel, reached via a hidden
@@ -113,7 +121,8 @@ browser instance with a fresh context per test). It covers: the core
 play loop and save persistence, all five apparatus, the leotard shop,
 the sound toggle, friend interactions, the snack bar/lounge/trophy wall
 and the 67 easter egg, the settings reset-confirmation + dev-mode
-flow, and Sparkle Ludo (rolling, player setup, computer turns).
+flow, and the Game Room's three games (Ludo rolling and computer
+turns, a Match turn and the computer's answer, a War flip).
 
 Run the dev server first, then:
 

@@ -20,7 +20,10 @@ export type SceneId =
   | "snackbar"
   | "lounge"
   | "trophies"
-  | "ludo";
+  | "gameroom"
+  | "ludo"
+  | "match"
+  | "war";
 
 export interface CelebrationEvent {
   id: string;
@@ -68,7 +71,8 @@ interface GameState {
   recordTrickResult: (input: TrickResultInput) => TrickResultOutcome;
   visitApparatus: (apparatusId: ApparatusId) => void;
   equipLeotard: (leotardId: string) => void;
-  awardLudoWin: (winnerName: string, stars: number) => void;
+  /** A kid won a Game Room game (Ludo, Match, War): add stars and cheer. */
+  awardGameWin: (gameTitle: string, winnerName: string, stars: number) => void;
   setCompanionFriend: (friendId: string | null) => void;
   toggleSound: () => void;
   setReducedMotion: (value: boolean) => void;
@@ -260,13 +264,13 @@ export const useGameStore = create<GameState>()(
         set({ equippedLeotardId: leotardId });
       },
 
-      awardLudoWin: (winnerName, stars) =>
+      awardGameWin: (gameTitle, winnerName, stars) =>
         set((prev) => {
           const draft: GameState = { ...prev, stars: prev.stars + stars };
           evaluateMilestones(draft);
           pushCelebration(draft.celebrationQueue, {
             kind: "game",
-            title: "Sparkle Ludo Champion!",
+            title: `${gameTitle} Champion!`,
             subtitle: `${winnerName} won! +${stars} stars`,
             icon: "🏅",
           });

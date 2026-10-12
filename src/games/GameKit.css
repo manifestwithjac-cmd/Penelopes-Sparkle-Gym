@@ -1,0 +1,338 @@
+/* Shared Game Room styles: the header, settings sheet, setting rows and win card. */
+
+.game-scene {
+  --game-floor-top: #ffe3f1;
+  --game-floor-bottom: #ead6ff;
+  --game-glitter: rgba(255, 255, 255, 0.9);
+
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 18%, var(--game-glitter) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 78% 9%, var(--game-glitter) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 64%, var(--game-glitter) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 6% 82%, var(--game-glitter) 0 1px, transparent 2px),
+    linear-gradient(180deg, var(--game-floor-top) 0%, var(--game-floor-bottom) 100%);
+  background-size: 180px 180px, 230px 230px, 210px 210px, 160px 160px, 100% 100%;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.game-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) 0;
+  padding-top: max(env(safe-area-inset-top, 0px), var(--space-3));
+}
+
+.game-hud__title {
+  font-size: clamp(1.3rem, 4.6vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--pink-600);
+  text-shadow: 0 2px 0 var(--white), 0 4px 10px rgba(232, 34, 128, 0.25);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.game-hud__title span {
+  color: var(--purple-500);
+}
+
+.game-hud__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.game-hud__gear {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+  font-size: 1.5rem;
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.game-hud__gear:active {
+  transform: scale(0.9);
+}
+
+.game-message {
+  align-self: center;
+  margin: var(--space-2) var(--space-4) 0;
+  padding: var(--space-2) var(--space-5);
+  min-height: 2.4em;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-round);
+  background: var(--white);
+  border: 3px solid var(--pink-300);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(0.95rem, 2.8vw, 1.25rem);
+  color: var(--pink-700);
+  text-align: center;
+  text-wrap: balance;
+  max-width: calc(100% - 2 * var(--space-4));
+}
+
+/* ---- Sheets ---------------------------------------------------------------- */
+
+.game-sheet-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: rgba(90, 40, 110, 0.35);
+}
+
+.game-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  border: 4px solid var(--pink-300);
+  box-shadow: var(--shadow-pop);
+  animation: gameSheetIn 260ms var(--ease-bounce);
+}
+
+@keyframes gameSheetIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.game-sheet__title {
+  text-align: center;
+  font-size: 1.6rem;
+}
+
+.game-sheet__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--pink-50);
+  font-size: 1.1rem;
+  color: var(--color-primary-strong);
+}
+
+.game-sheet__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.game-sheet__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  text-align: center;
+  font-weight: 700;
+}
+
+.game-howto summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--pink-600);
+  padding-block: var(--space-1);
+}
+
+.game-rules {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.3em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.game-rules li::marker {
+  content: "✦  ";
+  color: var(--pink-400);
+}
+
+.game-rules b {
+  color: var(--pink-600);
+}
+
+/* ---- Setting rows ----------------------------------------------------------- */
+
+.game-choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.game-choice__head {
+  display: flex;
+  flex-direction: column;
+}
+
+.game-choice__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.game-choice__help {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  min-height: 1.3em;
+}
+
+.game-choice__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.game-choice__option {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  border: 3px solid var(--pink-100);
+  background: var(--pink-50);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.game-choice__option:active {
+  transform: scale(0.94);
+}
+
+.game-choice__option--on {
+  border-color: var(--pink-400);
+  background: var(--pink-100);
+  color: var(--pink-700);
+}
+
+.game-choice__option:focus-visible {
+  outline: 4px solid var(--purple-400);
+  outline-offset: 2px;
+}
+
+/* ---- Win card --------------------------------------------------------------- */
+
+.game-win {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  padding-top: calc(var(--space-5) + 70px);
+  background: rgba(90, 40, 110, 0.4);
+  animation: gameFade 400ms ease-out;
+}
+
+.game-win--kid {
+  background: radial-gradient(circle, rgba(255, 140, 198, 0.45), rgba(90, 40, 110, 0.45));
+}
+
+.game-win__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 440px;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  border: 5px solid var(--pink-400);
+  box-shadow: var(--shadow-pop);
+  text-align: center;
+  animation: gameSheetIn 500ms var(--ease-bounce);
+}
+
+.game-win__figure {
+  width: clamp(110px, 26vw, 150px);
+  height: clamp(150px, 34vw, 200px);
+  margin-top: -100px;
+}
+
+.game-win__medal {
+  font-size: 3rem;
+  line-height: 1;
+  animation: gameBounce 1.2s var(--ease-soft) infinite;
+}
+
+.game-win__title {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  text-wrap: balance;
+}
+
+.game-win__sub {
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+@keyframes gameFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes gameBounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-8deg);
+  }
+}
+
+@media (max-width: 520px) {
+  .game-hud .big-button__label {
+    display: none;
+  }
+  .game-hud__gear {
+    width: 48px;
+    height: 48px;
+  }
+}

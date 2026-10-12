@@ -7,7 +7,7 @@ const DESTINATIONS: { id: SceneId; label: string; icon: string }[] = [
   { id: "lounge", label: "Friends Lounge", icon: "🛋️" },
   { id: "snackbar", label: "Snack Bar", icon: "🧡" },
   { id: "trophies", label: "Trophy Wall", icon: "🏆" },
-  { id: "ludo", label: "Sparkle Ludo", icon: "🎲" },
+  { id: "gameroom", label: "Game Room", icon: "🎲" },
 ];
 
 /**

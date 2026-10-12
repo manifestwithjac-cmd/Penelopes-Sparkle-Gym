@@ -5,6 +5,7 @@ import { useSound } from "../audio/useSound";
 import { Penelope } from "../characters/Penelope";
 import { BigButton } from "../components/ui/BigButton";
 import { SoundToggle } from "../components/ui/SoundToggle";
+import { GameChoice } from "../games/GameKit";
 import { LudoBoard } from "./LudoBoard";
 import { LudoPiece } from "./LudoPiece";
 import {
@@ -213,46 +214,7 @@ const LEVELS: { id: ComputerLevel; label: string; icon: string; help: string }[]
   { id: "hard", label: "Hard", icon: "🔥", help: "Computers play to win and bump anyone." },
 ];
 
-/** A row of big tap-to-pick choices (radio group) for one game setting. */
-function Choice<T extends string | number>({
-  label,
-  help,
-  options,
-  value,
-  onPick,
-}: {
-  label: string;
-  help: string;
-  options: { id: T; label: string; icon?: string }[];
-  value: T;
-  onPick: (id: T) => void;
-}) {
-  return (
-    <div className="ludo-choice">
-      <div className="ludo-choice__head">
-        <span className="ludo-choice__label">{label}</span>
-        <span className="ludo-choice__help">{help}</span>
-      </div>
-      <div className="ludo-choice__options" role="radiogroup" aria-label={label}>
-        {options.map((o) => (
-          <button
-            key={o.id}
-            type="button"
-            role="radio"
-            aria-checked={value === o.id}
-            className={`ludo-choice__option ${value === o.id ? "ludo-choice__option--on" : ""}`}
-            onClick={() => onPick(o.id)}
-          >
-            {o.icon && <span aria-hidden="true">{o.icon} </span>}
-            {o.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: boolean }) {
+function GameMenu({ onClose }: { onClose: () => void }) {
   const newGame = useLudoStore((s) => s.newGame);
   const settings = useLudoStore((s) => s.settings);
   const setSixBoost = useLudoStore((s) => s.setSixBoost);
@@ -269,14 +231,14 @@ function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: 
       <div className="ludo-sheet ludo-sheet--menu" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Game menu">
         <h2 className="ludo-sheet__title">Sparkle Ludo</h2>
 
-        <Choice
+        <GameChoice
           label="Computer players"
           help={LEVELS.find((l) => l.id === settings.level)!.help}
           options={LEVELS}
           value={settings.level}
           onPick={setLevel}
         />
-        <Choice
+        <GameChoice
           label="🍀 Lucky 6s"
           help={
             settings.sixBoost === 1
@@ -287,7 +249,7 @@ function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: 
           value={settings.sixBoost}
           onPick={setSixBoost}
         />
-        <Choice
+        <GameChoice
           label="Pieces each"
           help={
             settings.pieceCount === 4
@@ -332,11 +294,9 @@ function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: 
             >
               New game
             </BigButton>
-            {showGymExit && (
-              <BigButton size="md" variant="ghost" icon="🤸‍♀️" onClick={() => goToScene("gym")}>
-                Back to gym
-              </BigButton>
-            )}
+            <BigButton size="md" variant="ghost" icon="🎲" onClick={() => goToScene("gameroom")}>
+              Other games
+            </BigButton>
           </div>
         )}
 
@@ -359,7 +319,7 @@ function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: 
   );
 }
 
-function WinOverlay({ showGymExit }: { showGymExit: boolean }) {
+function WinOverlay() {
   const winner = useLudoStore((s) => s.winner);
   const name = useLudoStore((s) => (s.winner ? s.names[s.winner] : ""));
   const kind = useLudoStore((s) => (s.winner ? s.kinds[s.winner] : "off"));
@@ -385,19 +345,16 @@ function WinOverlay({ showGymExit }: { showGymExit: boolean }) {
           <BigButton size="lg" icon="🎲" onClick={newGame}>
             Play again
           </BigButton>
-          {showGymExit && (
-            <BigButton size="lg" variant="ghost" icon="🤸‍♀️" onClick={() => goToScene("gym")}>
-              Gym
-            </BigButton>
-          )}
+          <BigButton size="lg" variant="ghost" icon="🎲" onClick={() => goToScene("gameroom")}>
+            Games
+          </BigButton>
         </div>
       </div>
     </div>
   );
 }
 
-/** `showGymExit={false}` drops the "back to gym" buttons, for when the game runs on its own page. */
-export function LudoScene({ showGymExit = true }: { showGymExit?: boolean }) {
+export function LudoScene() {
   const goToScene = useGameStore((s) => s.goToScene);
   const message = useLudoStore((s) => s.message);
   const turn = useLudoStore((s) => s.turn);
@@ -412,13 +369,9 @@ export function LudoScene({ showGymExit = true }: { showGymExit?: boolean }) {
   return (
     <div className="ludo-scene">
       <header className="ludo-scene__hud">
-        {showGymExit ? (
-          <BigButton size="md" variant="ghost" icon="⬅️" onClick={() => goToScene("gym")}>
-            Gym
-          </BigButton>
-        ) : (
-          <span className="ludo-scene__hud-spacer" />
-        )}
+        <BigButton size="md" variant="ghost" icon="⬅️" onClick={() => goToScene("gameroom")}>
+          Games
+        </BigButton>
         <h1 className="ludo-scene__title">
           Sparkle <span>Ludo</span>
         </h1>
@@ -452,8 +405,8 @@ export function LudoScene({ showGymExit = true }: { showGymExit?: boolean }) {
       </div>
 
       {setupSeat && <SetupSheet seatId={setupSeat} onClose={() => setSetupSeat(null)} />}
-      {menuOpen && <GameMenu showGymExit={showGymExit} onClose={() => setMenuOpen(false)} />}
-      <WinOverlay showGymExit={showGymExit} />
+      {menuOpen && <GameMenu onClose={() => setMenuOpen(false)} />}
+      <WinOverlay />
     </div>
   );
 }

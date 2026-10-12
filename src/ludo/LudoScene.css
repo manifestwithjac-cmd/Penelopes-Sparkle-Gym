@@ -40,10 +40,6 @@
   padding-top: max(env(safe-area-inset-top, 0px), var(--space-3));
 }
 
-.ludo-scene__hud-spacer {
-  width: 120px;
-}
-
 .ludo-scene__title {
   font-size: clamp(1.3rem, 4.6vw, 2.1rem);
   font-weight: 800;
@@ -671,68 +667,6 @@
 
 .ludo-rules b {
   color: var(--pink-600);
-}
-
-.ludo-choice {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.ludo-choice__head {
-  display: flex;
-  flex-direction: column;
-}
-
-.ludo-choice__label {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.1rem;
-  color: var(--ink);
-}
-
-.ludo-choice__help {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-  min-height: 1.3em;
-}
-
-.ludo-choice__options {
-  display: flex;
-  gap: 6px;
-}
-
-.ludo-choice__option {
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 52px;
-  padding: 0 4px;
-  border-radius: var(--radius-sm);
-  border: 3px solid var(--pink-100);
-  background: var(--pink-50);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1rem;
-  color: var(--ink);
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  transition: transform var(--dur-fast) var(--ease-bounce);
-}
-
-.ludo-choice__option:active {
-  transform: scale(0.94);
-}
-
-.ludo-choice__option--on {
-  border-color: var(--pink-400);
-  background: var(--pink-100);
-  color: var(--pink-700);
-}
-
-.ludo-choice__option:focus-visible {
-  outline: 4px solid var(--purple-400);
-  outline-offset: 2px;
 }
 
 .ludo-howto summary {

@@ -239,7 +239,7 @@ export const useLudoStore = create<LudoState>()(
         }
 
         if (hasFinished(tokens[seat])) {
-          if (s.kinds[seat] === "kid") useGameStore.getState().awardLudoWin(name, LUDO_WIN_STARS);
+          if (s.kinds[seat] === "kid") useGameStore.getState().awardGameWin("Sparkle Ludo", name, LUDO_WIN_STARS);
           set({
             tokens,
             bumps,

@@ -192,7 +192,8 @@ function threatsAt(tokens: Tokens, seat: LudoSeatId, progress: number, active: L
   return threats;
 }
 
-export type ComputerLevel = "easy" | "medium" | "hard";
+export type { ComputerLevel } from "../games/gameUtils";
+import type { ComputerLevel } from "../games/gameUtils";
 
 /**
  * Picks a computer player's move, or `null` when an easy computer would

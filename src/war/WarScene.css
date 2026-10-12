@@ -1,0 +1,382 @@
+/*
+  Sparkle War. Layout concept: a face-off on the mat. The friend's pile at
+  the top, Penelope's at the bottom, and the two flipped cards meeting in
+  the middle, where the winner's card glows before the pile flies home.
+*/
+.war-scene {
+  --w-card: clamp(84px, 19vw, 150px);
+  --suit-heart: #ff3d9a;
+  --suit-star: #e6a400;
+  --suit-diamond: #2f8fe0;
+  --suit-flower: #8438e0;
+}
+
+/* ---- Cards ------------------------------------------------------------------- */
+
+.wcard {
+  --suit: var(--suit-heart);
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  border-radius: 10%;
+  background: linear-gradient(160deg, #ffffff 60%, #fff0f7);
+  border: 2px solid var(--pink-100);
+  box-shadow: 0 6px 14px rgba(90, 20, 90, 0.22);
+  font-family: var(--font-display);
+  font-size: calc(var(--w-card) / 9);
+  color: var(--suit);
+  overflow: hidden;
+}
+
+.wcard--star {
+  --suit: var(--suit-star);
+}
+.wcard--diamond {
+  --suit: var(--suit-diamond);
+}
+.wcard--flower {
+  --suit: var(--suit-flower);
+}
+
+.wcard__corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 800;
+  font-size: 1.5em;
+  line-height: 0.95;
+}
+
+.wcard__corner span {
+  font-size: 0.8em;
+}
+
+.wcard__corner--tl {
+  top: 5%;
+  left: 7%;
+}
+
+.wcard__corner--br {
+  bottom: 5%;
+  right: 7%;
+  transform: rotate(180deg);
+}
+
+.wcard__center {
+  position: absolute;
+  inset: 14% 18%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+}
+
+.wcard__rank {
+  font-size: 4.2em;
+  font-weight: 800;
+  line-height: 0.9;
+}
+
+.wcard__pips {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: center;
+  gap: 0 0.25em;
+  font-size: 0.95em;
+  line-height: 1.05;
+}
+
+.wcard__pips--many {
+  grid-template-columns: repeat(5, auto);
+}
+
+.wcard__picture {
+  font-size: 3.6em;
+  line-height: 1.1;
+}
+
+.wcard__value {
+  padding: 0.05em 0.6em;
+  border-radius: 999px;
+  background: var(--suit);
+  color: var(--white);
+  font-weight: 800;
+  font-size: 1.1em;
+}
+
+.wcard--back {
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--white);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.5) 0 1.5px, transparent 2.5px) 0 0 / 20% 14%,
+    linear-gradient(150deg, var(--pink-400), var(--purple-500));
+  color: var(--white);
+  font-size: calc(var(--w-card) / 3);
+  text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.8);
+}
+
+/* ---- Table -------------------------------------------------------------------- */
+
+.war-message--war {
+  border-color: var(--gold-400);
+  color: var(--purple-600);
+  animation: warShake 400ms ease-in-out;
+}
+
+@keyframes warShake {
+  25% {
+    transform: rotate(-3deg) scale(1.05);
+  }
+  75% {
+    transform: rotate(3deg) scale(1.05);
+  }
+}
+
+.war-table {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) max(env(safe-area-inset-bottom, 0px), var(--space-4));
+}
+
+.war-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.war-side__figure {
+  width: 60px;
+  height: 82px;
+}
+
+.war-side__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--purple-600);
+}
+
+.war-side--kid .war-side__name {
+  color: var(--pink-600);
+}
+
+.war-deck {
+  position: relative;
+  width: calc(var(--w-card) * 0.72);
+  --w-card: clamp(70px, 14vw, 110px);
+  padding: 0;
+}
+
+.war-deck .wcard--back {
+  box-shadow:
+    3px 3px 0 var(--pink-200),
+    6px 6px 0 var(--purple-200),
+    0 10px 18px rgba(90, 20, 90, 0.25);
+}
+
+.war-deck__empty {
+  display: block;
+  aspect-ratio: 5 / 7;
+  border-radius: 10%;
+  border: 3px dashed var(--pink-200);
+}
+
+.war-deck__count {
+  position: absolute;
+  right: -12px;
+  bottom: -10px;
+  min-width: 36px;
+  padding: 2px 8px;
+  border-radius: var(--radius-round);
+  background: var(--white);
+  border: 3px solid var(--purple-300);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--purple-600);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.war-deck--kid .war-deck__count {
+  border-color: var(--pink-400);
+  color: var(--pink-600);
+}
+
+.war-deck--ready {
+  cursor: pointer;
+  animation: warReady 1.4s ease-in-out infinite;
+}
+
+.war-deck--ready:active {
+  transform: scale(0.94);
+  animation: none;
+}
+
+.war-deck:focus-visible {
+  outline: 4px solid var(--purple-400);
+  outline-offset: 4px;
+  border-radius: 12%;
+}
+
+@keyframes warReady {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-2deg);
+  }
+}
+
+.war-side__hint {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--pink-600);
+}
+
+.war-side__hint--wait {
+  color: var(--ink-soft);
+}
+
+/* The face-off */
+.war-battle {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.55);
+  border: 3px dashed var(--pink-200);
+  padding: var(--space-3);
+}
+
+.war-pot {
+  display: flex;
+  justify-content: center;
+  min-height: calc(var(--w-card) * 1.4);
+}
+
+.war-pot__card {
+  flex: none;
+  width: var(--w-card);
+  transition: transform var(--dur-med) var(--ease-bounce);
+}
+
+.war-pot__card + .war-pot__card {
+  margin-left: calc(var(--w-card) * -0.72);
+}
+
+.war-pot__card--down {
+  transform: scale(0.82) rotate(-4deg);
+}
+
+.war-pot__card--up {
+  animation: warFlip 380ms var(--ease-soft);
+}
+
+.war-pot__card--win {
+  transform: scale(1.12);
+}
+
+.war-pot__card--win .wcard {
+  box-shadow:
+    0 0 0 4px var(--gold-400),
+    0 0 26px 6px rgba(255, 205, 60, 0.75),
+    0 8px 16px rgba(90, 20, 90, 0.3);
+}
+
+@keyframes warFlip {
+  from {
+    transform: rotateY(90deg) scale(0.9);
+  }
+}
+
+/* After the winner glows, both piles slide to the winner's side. */
+.war-pot--fly-home.war-pot--kid,
+.war-pot--fly-away.war-pot--cpu {
+  animation: warToKid 450ms ease-in 750ms forwards;
+}
+
+.war-pot--fly-home.war-pot--cpu,
+.war-pot--fly-away.war-pot--kid {
+  animation: warToCpu 450ms ease-in 750ms forwards;
+}
+
+@keyframes warToKid {
+  to {
+    transform: translateY(70%) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes warToCpu {
+  to {
+    transform: translateY(-70%) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.war-battle__mid {
+  position: relative;
+  z-index: 5;
+  margin-block: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.war-battle__flips {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.war-battle__war {
+  display: inline-block;
+  font-size: clamp(2rem, 7vw, 3.2rem);
+  color: var(--purple-500);
+  text-shadow: 0 3px 0 var(--gold-300);
+  animation: warPop 600ms var(--ease-bounce);
+}
+
+@keyframes warPop {
+  from {
+    transform: scale(0.3) rotate(-12deg);
+  }
+}
+
+.war-battle__burst {
+  position: absolute;
+  left: 50%;
+  top: 75%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+@media (max-height: 760px) {
+  .war-scene {
+    --w-card: clamp(70px, 13vh, 120px);
+  }
+  .war-side__figure {
+    width: 44px;
+    height: 60px;
+  }
+}

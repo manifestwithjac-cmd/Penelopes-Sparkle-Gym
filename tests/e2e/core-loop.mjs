@@ -375,16 +375,23 @@ async function testSettingsResetAndDevMode() {
   });
 }
 
+/** From a fresh page: PLAY → world menu → Game Room → the named game. */
+async function openGameRoomGame(page, name) {
+  await page.goto(BASE_URL, { waitUntil: "networkidle" });
+  await page.getByText("PLAY", { exact: false }).click();
+  await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+  await page.evaluate(() => document.querySelector('[aria-label="Around the gym"]').click());
+  await page.locator(".world-menu").waitFor({ timeout: 3000 });
+  await page.evaluate(() =>
+    [...document.querySelectorAll("button")].find((b) => b.textContent.includes("Game Room")).click(),
+  );
+  await page.locator(".game-room").waitFor({ timeout: 3000 });
+  await page.locator(".game-room__card", { hasText: name }).click();
+}
+
 async function testSparkleLudo() {
   await withPage(async (page, pageErrors) => {
-    await page.goto(BASE_URL, { waitUntil: "networkidle" });
-    await page.getByText("PLAY", { exact: false }).click();
-    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
-    await page.evaluate(() => document.querySelector('[aria-label="Around the gym"]').click());
-    await page.locator(".world-menu").waitFor({ timeout: 3000 });
-    await page.evaluate(() =>
-      [...document.querySelectorAll("button")].find((b) => b.textContent.includes("Sparkle Ludo")).click(),
-    );
+    await openGameRoomGame(page, "Sparkle Ludo");
     await page.locator(".ludo-scene").waitFor({ timeout: 3000 });
     assert.equal(await page.locator(".ludo-token").count(), 16, "four players, four pieces each");
 
@@ -416,6 +423,49 @@ async function testSparkleLudo() {
   });
 }
 
+async function testSparkleMatch() {
+  await withPage(async (page, pageErrors) => {
+    await openGameRoomGame(page, "Sparkle Match");
+    await page.locator(".match-scene").waitFor({ timeout: 3000 });
+    assert.equal(await page.locator(".match-hand__card").count(), 7, "Penelope is dealt 7 cards");
+
+    // Take a turn: play a matching card, or pick one up if nothing matches.
+    const before = await page.locator(".match-hand__card").count();
+    if (await page.locator(".match-hand__card--ok").count()) {
+      await page.locator(".match-hand__card--ok").first().click();
+      if (await page.locator(".match-picker__color").count()) await page.locator(".match-picker__color").first().click();
+    } else {
+      await page.locator(".match-deck").click({ force: true });
+      if (await page.getByText("Pass", { exact: true }).count()) await page.getByText("Pass", { exact: true }).click();
+    }
+    assert.notEqual(await page.locator(".match-hand__card").count(), before, "her turn changed her hand");
+
+    // The computer friend answers on its own, handing the turn back.
+    await page.locator(".game-message", { hasText: /Your turn|Go again|SPARKLE|picked up/ }).waitFor({ timeout: 6000 });
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: Sparkle Match deals, plays a turn, and the computer friend answers");
+  });
+}
+
+async function testSparkleWar() {
+  await withPage(async (page, pageErrors) => {
+    await openGameRoomGame(page, "Sparkle War");
+    await page.locator(".war-scene").waitFor({ timeout: 3000 });
+    await page.locator(".war-deck--ready").click({ force: true });
+    assert.equal(await page.locator(".war-pot__card--up").count(), 2, "both players flip a card");
+    // Reveal → (maybe war) → collect → ready to flip again.
+    await page.locator(".war-deck--ready").waitFor({ timeout: 10000 });
+    const flips = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("penelopes-sparkle-gym-war")).state.flips,
+    );
+    assert.equal(flips, 1, "one flip played out");
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: Sparkle War flips, compares, and hands the cards to the winner");
+  });
+}
+
 const tests = [
   testCoreLoop,
   testReturningPlayer,
@@ -426,6 +476,8 @@ const tests = [
   testWorldFeatures,
   testSettingsResetAndDevMode,
   testSparkleLudo,
+  testSparkleMatch,
+  testSparkleWar,
 ];
 let failed = false;
 for (const t of tests) {

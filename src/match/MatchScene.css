@@ -1,0 +1,544 @@
+/*
+  Sparkle Match. Layout concept: a card table read top to bottom like a
+  real one: the friend's hand across the mat, the pick-up deck and the
+  played pile in the middle, Penelope's own hand fanned along the bottom
+  edge where her fingers are.
+*/
+.match-scene {
+  --m-pink: #ff4fa6;
+  --m-pink-deep: #c11569;
+  --m-purple: #9a5cf5;
+  --m-purple-deep: #5f22b0;
+  --m-sky: #4fb3ff;
+  --m-sky-deep: #1f6fb5;
+  --m-gold: #ffbf1f;
+  --m-gold-deep: #b07800;
+  --m-felt: #fff2f9;
+}
+
+/* ---- Card faces ------------------------------------------------------------- */
+
+.mcard {
+  --tone: var(--m-pink);
+  --tone-deep: var(--m-pink-deep);
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 13%;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tone) 75%, white), var(--tone) 55%, var(--tone-deep));
+  border: 0.32em solid var(--white);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--tone-deep) 40%, transparent),
+    0 6px 14px rgba(90, 20, 90, 0.25);
+  font-family: var(--font-display);
+  font-size: calc(var(--w, var(--card-w)) / 9);
+  color: var(--white);
+  overflow: hidden;
+}
+
+.mcard--purple {
+  --tone: var(--m-purple);
+  --tone-deep: var(--m-purple-deep);
+}
+.mcard--sky {
+  --tone: var(--m-sky);
+  --tone-deep: var(--m-sky-deep);
+}
+.mcard--gold {
+  --tone: var(--m-gold);
+  --tone-deep: var(--m-gold-deep);
+}
+
+.mcard--rainbow {
+  --tone-deep: #4a2159;
+  background: conic-gradient(from 45deg, var(--m-pink), var(--m-purple), var(--m-sky), var(--m-gold), var(--m-pink));
+}
+
+/* A played rainbow card glows in the color its player named. */
+.mcard--chose-pink {
+  box-shadow: 0 0 0 0.35em var(--m-pink), 0 6px 14px rgba(90, 20, 90, 0.25);
+}
+.mcard--chose-purple {
+  box-shadow: 0 0 0 0.35em var(--m-purple), 0 6px 14px rgba(90, 20, 90, 0.25);
+}
+.mcard--chose-sky {
+  box-shadow: 0 0 0 0.35em var(--m-sky), 0 6px 14px rgba(90, 20, 90, 0.25);
+}
+.mcard--chose-gold {
+  box-shadow: 0 0 0 0.35em var(--m-gold), 0 6px 14px rgba(90, 20, 90, 0.25);
+}
+
+.mcard__oval {
+  position: absolute;
+  inset: 16% 12%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--white);
+  transform: rotate(-18deg);
+  box-shadow: inset 0 -0.2em 0 color-mix(in srgb, var(--tone-deep) 25%, transparent);
+}
+
+.mcard--rainbow .mcard__oval {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.mcard__symbol {
+  transform: rotate(18deg);
+  font-size: 4.2em;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--tone);
+  text-shadow: 0.04em 0.06em 0 var(--tone-deep);
+}
+
+.mcard__symbol--wide {
+  font-size: 3.3em;
+}
+
+.mcard--rainbow .mcard__symbol {
+  color: var(--ink);
+  text-shadow: none;
+}
+
+.mcard__corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 0.06em 0 var(--tone-deep);
+}
+
+.mcard__corner--tl {
+  top: 6%;
+  left: 8%;
+}
+
+.mcard__corner--br {
+  bottom: 6%;
+  right: 8%;
+  transform: rotate(180deg);
+}
+
+.mcard--underline .mcard__symbol,
+.mcard--underline .mcard__corner {
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.08em;
+}
+
+.mcard__charm {
+  font-size: 0.7em;
+  margin-top: 0.15em;
+  text-shadow: none;
+}
+
+.mcard--back {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.5) 0 1.5px, transparent 2.5px) 0 0 / 18% 12%,
+    linear-gradient(150deg, var(--pink-400), var(--purple-500));
+  display: grid;
+  place-items: center;
+}
+
+.mcard__back-mark {
+  font-size: 4em;
+  color: var(--white);
+  text-shadow: 0 0 0.3em rgba(255, 255, 255, 0.8);
+}
+
+/* ---- Table ------------------------------------------------------------------- */
+
+.match-message--pink {
+  border-color: var(--m-pink);
+}
+.match-message--purple {
+  border-color: var(--m-purple);
+}
+.match-message--sky {
+  border-color: var(--m-sky);
+}
+.match-message--gold {
+  border-color: var(--m-gold);
+}
+
+.match-table {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 980px;
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4) max(env(safe-area-inset-bottom, 0px), var(--space-4));
+}
+
+/* Friend across the mat */
+.match-opponent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.6);
+  border: 3px solid transparent;
+  transition: border-color var(--dur-med);
+}
+
+.match-opponent--turn {
+  border-color: var(--purple-300);
+}
+
+.match-opponent__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.match-opponent__figure {
+  flex: none;
+  width: 58px;
+  height: 80px;
+}
+
+.match-opponent__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.match-opponent__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--purple-600);
+}
+
+.match-opponent__count {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.match-thinking {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--purple-400);
+}
+
+.match-thinking::after {
+  content: "…";
+  animation: matchDots 1s steps(3) infinite;
+}
+
+@keyframes matchDots {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.match-opponent__fan {
+  --w: calc(var(--card-w) * 0.55);
+  position: relative;
+  flex: 1;
+  height: calc(var(--w) * 1.6);
+  min-width: 0;
+}
+
+.match-opponent__back {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--w);
+  transform: translateX(calc(-50% + var(--i) * var(--w) * 0.32)) rotate(calc(var(--i) * 4deg));
+  transform-origin: 50% 120%;
+}
+
+/* Deck + played pile */
+.match-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 5vw, 48px);
+}
+
+.match-deck {
+  --w: calc(var(--card-w) * 1.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+}
+
+.match-deck__stack {
+  display: block;
+  width: var(--w);
+  filter: drop-shadow(3px 3px 0 var(--purple-200)) drop-shadow(3px 3px 0 var(--pink-200));
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.match-deck:active:not(:disabled) .match-deck__stack {
+  transform: scale(0.94);
+}
+
+.match-deck__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--purple-600);
+  white-space: nowrap;
+}
+
+.match-deck:disabled .match-deck__label {
+  opacity: 0.45;
+}
+
+.match-deck--nudge .match-deck__stack {
+  animation: matchNudge 1.4s ease-in-out infinite;
+}
+
+.match-deck--nudge .match-deck__label {
+  color: var(--pink-600);
+}
+
+@keyframes matchNudge {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  70% {
+    transform: rotate(-6deg) scale(1.06);
+  }
+  85% {
+    transform: rotate(5deg) scale(1.06);
+  }
+}
+
+.match-pile {
+  --w: calc(var(--card-w) * 1.3);
+  position: relative;
+  width: var(--w);
+  aspect-ratio: 2 / 3;
+}
+
+.match-pile__under,
+.match-pile__top {
+  position: absolute;
+  inset: 0;
+}
+
+.match-pile__under {
+  transform: rotate(var(--tilt));
+}
+
+.match-pile__top--from-kid {
+  animation: matchFromKid 320ms var(--ease-soft);
+}
+
+.match-pile__top--from-cpu {
+  animation: matchFromCpu 320ms var(--ease-soft);
+}
+
+@keyframes matchFromKid {
+  from {
+    transform: translateY(120%) rotate(12deg) scale(0.8);
+  }
+}
+
+@keyframes matchFromCpu {
+  from {
+    transform: translateY(-120%) rotate(-12deg) scale(0.6);
+  }
+}
+
+.match-color {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 72px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--tone);
+  color: var(--white);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  text-shadow: 0 1px 0 var(--tone-deep);
+  box-shadow: var(--shadow-soft);
+  --tone: var(--m-pink);
+  --tone-deep: var(--m-pink-deep);
+}
+
+.match-color span:first-child {
+  font-size: 1.6rem;
+  text-shadow: none;
+}
+
+.match-color--purple {
+  --tone: var(--m-purple);
+  --tone-deep: var(--m-purple-deep);
+}
+.match-color--sky {
+  --tone: var(--m-sky);
+  --tone-deep: var(--m-sky-deep);
+}
+.match-color--gold {
+  --tone: var(--m-gold);
+  --tone-deep: var(--m-gold-deep);
+}
+
+/* Penelope's hand */
+.match-kid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.match-kid__actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+.match-hand {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-top: 18px;
+  min-height: calc(var(--card-w) * 1.5 + 18px);
+}
+
+.match-hand__card {
+  --w: var(--card-w);
+  position: relative;
+  flex: none;
+  width: var(--card-w);
+  padding: 0;
+  transition:
+    transform var(--dur-med) var(--ease-bounce),
+    filter var(--dur-med);
+  animation: matchDealIn 300ms var(--ease-bounce) backwards;
+}
+
+.match-hand__card--ok {
+  transform: translateY(-16px);
+  cursor: pointer;
+}
+
+.match-hand__card--ok .mcard {
+  box-shadow:
+    0 0 0 3px var(--gold-400),
+    0 0 18px 4px rgba(255, 205, 60, 0.7),
+    0 8px 16px rgba(90, 20, 90, 0.3);
+}
+
+.match-hand__card--ok:active {
+  transform: translateY(-22px) scale(0.96);
+}
+
+.match-hand__card--no {
+  filter: saturate(0.55) brightness(0.92);
+}
+
+.match-hand__card--new {
+  animation: matchDealIn 400ms var(--ease-bounce);
+}
+
+.match-hand__card:focus-visible {
+  outline: 4px solid var(--purple-400);
+  outline-offset: 3px;
+  border-radius: 14%;
+}
+
+@keyframes matchDealIn {
+  from {
+    transform: translateY(-80px) scale(0.7);
+    opacity: 0;
+  }
+}
+
+.match-kid__burst {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Color picker for rainbow cards */
+.match-picker__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.match-picker__color {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 110px;
+  border-radius: var(--radius-md);
+  background: var(--tone);
+  color: var(--white);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  text-shadow: 0 2px 0 var(--tone-deep);
+  box-shadow: 0 6px 0 var(--tone-deep), var(--shadow-soft);
+  transition: transform var(--dur-fast) var(--ease-bounce);
+  --tone: var(--m-pink);
+  --tone-deep: var(--m-pink-deep);
+}
+
+.match-picker__color span {
+  font-size: 2.2rem;
+  text-shadow: none;
+}
+
+.match-picker__color:active {
+  transform: translateY(4px) scale(0.97);
+}
+
+.match-picker__color--purple {
+  --tone: var(--m-purple);
+  --tone-deep: var(--m-purple-deep);
+}
+.match-picker__color--sky {
+  --tone: var(--m-sky);
+  --tone-deep: var(--m-sky-deep);
+}
+.match-picker__color--gold {
+  --tone: var(--m-gold);
+  --tone-deep: var(--m-gold-deep);
+}
+
+@media (max-width: 520px) {
+  .match-opponent__figure {
+    width: 44px;
+    height: 60px;
+  }
+  .match-color {
+    min-width: 60px;
+    font-size: 0.85rem;
+  }
+}

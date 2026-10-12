@@ -1,9 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSound } from "../audio/useSound";
 import { StarBurst } from "../effects/StarBurst";
 import { FriendFigure, GameChoice, GameHud, GameSheet, GameWin, NewGameRow } from "../games/GameKit";
 import { LEVEL_OPTIONS, OPPONENTS, opponentName } from "../games/gameUtils";
 import { BigButton } from "../components/ui/BigButton";
+import { useBoxSize } from "../games/useBoxSize";
 import { MatchCardBack, MatchCardFace } from "./MatchCardView";
 import { COLOR_CHARM, MATCH_COLORS, MATCH_COLOR_NAMES, canPlay, matchCardLabel } from "./matchRules";
 import { HAND_SIZES, MATCH_WIN_STARS, useMatchStore, type HandSize } from "./matchStore";
@@ -58,20 +59,26 @@ function useMatchSounds() {
   }, []);
 }
 
-/** Card width and fan spacing so the hand always fits the row, however many cards she's holding. */
-function useHandFit(count: number) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(360);
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-  const cardW = Math.round(Math.min(150, Math.max(64, width * 0.17)));
-  const pitch = count > 1 ? Math.min(cardW + 8, (width - cardW) / (count - 1)) : 0;
-  return { ref, cardW, step: pitch - cardW };
+/**
+ * Card size for the table, from its measured box: as wide as the screen
+ * allows, but never so big that the friend's row, the piles and Penelope's
+ * hand stop fitting top to bottom.
+ */
+function cardSizeFor(width: number, height: number) {
+  if (!width || !height) return 96;
+  const byWidth = width * 0.17;
+  // Friend row (~96px, or 0.88 card when cards are big) + pile (1.95 card) +
+  // hand (1.5 card + 18px headroom for lifted cards) + gaps (~64px).
+  const byHeightSmall = (height - 180) / 3.45;
+  const byHeightBig = (height - 100) / 4.33;
+  return Math.round(Math.max(48, Math.min(150, byWidth, byHeightSmall, byHeightBig)));
+}
+
+/** Fan spacing so the hand always fits the row, however many cards she's holding. */
+function handStep(count: number, cardW: number, rowWidth: number) {
+  if (count < 2) return 0;
+  const pitch = Math.min(cardW + 8, (rowWidth - cardW) / (count - 1));
+  return pitch - cardW;
 }
 
 function ColorPicker() {
@@ -166,7 +173,9 @@ export function MatchScene() {
   );
   const mustDraw = kidTurn && !s.drewPlayable && playableIds.size === 0;
   const friend = opponentName(s.settings.opponentId);
-  const { ref: handRef, cardW, step } = useHandFit(s.hands.kid.length);
+  const { ref: tableRef, width, height } = useBoxSize<HTMLDivElement>();
+  const cardW = cardSizeFor(width, height);
+  const step = handStep(s.hands.kid.length, cardW, width);
   const backsShown = Math.min(s.hands.cpu.length, 12);
 
   return (
@@ -176,7 +185,7 @@ export function MatchScene() {
         {s.message}
       </p>
 
-      <div className="match-table">
+      <div className="match-table" ref={tableRef}>
         <section className={`match-opponent ${s.turn === "cpu" && !s.winner ? "match-opponent--turn" : ""}`}>
           <div className="match-opponent__who">
             <div className="match-opponent__figure">
@@ -243,7 +252,7 @@ export function MatchScene() {
               </BigButton>
             )}
           </div>
-          <div className="match-hand" ref={handRef}>
+          <div className="match-hand">
             {s.hands.kid.map((card, i) => {
               const ok = playableIds.has(card.id);
               return (

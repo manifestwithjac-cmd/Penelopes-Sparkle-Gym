@@ -3,8 +3,10 @@
   the top, Penelope's at the bottom, and the two flipped cards meeting in
   the middle, where the winner's card glows before the pile flies home.
 */
+/* --w-card (battle cards) and --deck-w (the piles) are measured in WarScene and set in px. */
 .war-scene {
-  --w-card: clamp(84px, 19vw, 150px);
+  --w-card: 120px;
+  --deck-w: 80px;
   --suit-heart: #ff3d9a;
   --suit-star: #e6a400;
   --suit-diamond: #2f8fe0;
@@ -171,9 +173,9 @@
 }
 
 .war-deck {
+  --w-card: var(--deck-w);
   position: relative;
-  width: calc(var(--w-card) * 0.72);
-  --w-card: clamp(70px, 14vw, 110px);
+  width: var(--deck-w);
   padding: 0;
 }
 
@@ -369,14 +371,4 @@
   width: 0;
   height: 0;
   pointer-events: none;
-}
-
-@media (max-height: 760px) {
-  .war-scene {
-    --w-card: clamp(70px, 13vh, 120px);
-  }
-  .war-side__figure {
-    width: 44px;
-    height: 60px;
-  }
 }

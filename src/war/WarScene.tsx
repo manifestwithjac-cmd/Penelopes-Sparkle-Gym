@@ -3,6 +3,7 @@ import { useSound } from "../audio/useSound";
 import { StarBurst } from "../effects/StarBurst";
 import { FriendFigure, GameChoice, GameHud, GameSheet, GameWin, NewGameRow } from "../games/GameKit";
 import { OPPONENTS, opponentName } from "../games/gameUtils";
+import { useBoxSize } from "../games/useBoxSize";
 import { SUIT_SYMBOL, rankLabel, rankName, type WarCard } from "./warRules";
 import { WAR_LENGTHS, WAR_WIN_STARS, useWarStore, type PotCard } from "./warStore";
 import "../games/GameKit.css";
@@ -11,6 +12,17 @@ import "./WarScene.css";
 const REVEAL_MS = 1100;
 const WAR_MS = 1500;
 const COLLECT_MS = 1300;
+
+/**
+ * Card sizes from the measured table so both piles and the face-off fit
+ * top to bottom: two pile rows (~0.7 card each, at least the 82px friend
+ * figure) plus two battle rows (1.4 card each) plus labels and padding.
+ */
+function cardSizesFor(width: number, height: number) {
+  if (!width || !height) return { card: 120, deck: 80 };
+  const card = Math.max(56, Math.min(160, width * 0.2, (height - 280) / 2.8, (height - 120) / 4.2));
+  return { card: Math.round(card), deck: Math.round(Math.max(48, Math.min(110, card * 0.62))) };
+}
 
 const FACE_PICTURE: Record<number, string> = { 11: "🤸‍♀️", 12: "👸", 13: "🤴", 14: "🌟" };
 
@@ -173,6 +185,8 @@ export function WarScene() {
   const [menuOpen, setMenuOpen] = useState(false);
   useWarDriver();
   useWarSounds();
+  const { ref: tableRef, width, height } = useBoxSize<HTMLDivElement>();
+  const sizes = cardSizesFor(width, height);
 
   const friend = opponentName(s.settings.opponentId);
   const canFlip = s.phase === "flip";
@@ -180,13 +194,16 @@ export function WarScene() {
   const total = s.settings.length;
 
   return (
-    <div className="game-scene war-scene">
+    <div
+      className="game-scene war-scene"
+      style={{ "--w-card": `${sizes.card}px`, "--deck-w": `${sizes.deck}px` } as React.CSSProperties}
+    >
       <GameHud title="Sparkle" accent="War" onMenu={() => setMenuOpen(true)} />
       <p className={`game-message ${s.phase === "war" ? "war-message--war" : ""}`} aria-live="polite">
         {s.message}
       </p>
 
-      <div className="war-table">
+      <div className="war-table" ref={tableRef}>
         <section className="war-side war-side--cpu">
           <div className="war-side__figure">
             <FriendFigure id={s.settings.opponentId} pose={s.roundWinner === "cpu" ? "cheer" : "idle"} />

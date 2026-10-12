@@ -6,6 +6,7 @@ import { Penelope } from "../characters/Penelope";
 import { BigButton } from "../components/ui/BigButton";
 import { SoundToggle } from "../components/ui/SoundToggle";
 import { GameChoice } from "../games/GameKit";
+import { useBoxSize } from "../games/useBoxSize";
 import { LudoBoard } from "./LudoBoard";
 import { LudoPiece } from "./LudoPiece";
 import {
@@ -29,6 +30,22 @@ const COMPUTER_ROLL_MS = 900;
 const PICK_DELAY_MS = 650;
 
 const KIND_ICON: Record<LudoPlayerKind, string> = { kid: "🙋‍♀️", computer: "🤖", off: "💤" };
+
+const TABLE_GAP = 10;
+
+/**
+ * Picks where the four scorecards go (above/below the board, or beside it)
+ * by whichever leaves the bigger board, and sizes everything in px.
+ */
+function tableLayout(width: number, height: number) {
+  const badgeH = width < 520 ? 60 : 74;
+  const badgeW = Math.round(Math.min(240, Math.max(150, width * 0.21)));
+  const tall = Math.min(width, height - 2 * (badgeH + TABLE_GAP));
+  const wide = Math.min(height, width - 2 * (badgeW + TABLE_GAP));
+  const arrangement: "tall" | "wide" = tall >= wide ? "tall" : "wide";
+  const board = Math.max(200, Math.floor(Math.max(tall, wide)));
+  return { arrangement, board, badgeW, badgeH };
+}
 
 /** Drives the game clock: dice tumbles, piece steps and computer turns. */
 function useLudoDriver(play: ReturnType<typeof useSound>) {
@@ -362,6 +379,8 @@ export function LudoScene() {
   const [menuOpen, setMenuOpen] = useState(false);
   const play = useSound();
   useLudoDriver(play);
+  const { ref: tableRef, width, height } = useBoxSize<HTMLDivElement>();
+  const layout = tableLayout(width, height);
   useLudoSounds(play);
 
   const turnSeat = LUDO_SEATS_BY_ID[turn];
@@ -391,8 +410,17 @@ export function LudoScene() {
         {message}
       </p>
 
-      <div className="ludo-scene__table">
-        <div className="ludo-table">
+      <div className="ludo-scene__table" ref={tableRef}>
+        <div
+          className={`ludo-table ludo-table--${layout.arrangement}`}
+          style={
+            {
+              "--board": `${layout.board}px`,
+              "--badge-w": `${layout.badgeW}px`,
+              "--ludo-badge-h": `${layout.badgeH}px`,
+            } as React.CSSProperties
+          }
+        >
           {LUDO_SEATS.map((seat) => (
             <div key={seat.id} className={`ludo-table__slot ludo-table__slot--${seat.corner}`}>
               <PlayerBadge seatId={seat.id} onSetup={() => setSetupSeat(seat.id)} />

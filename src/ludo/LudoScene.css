@@ -8,8 +8,6 @@
   --ludo-floor-top: #ffe3f1;
   --ludo-floor-bottom: #ead6ff;
   --ludo-glitter: rgba(255, 255, 255, 0.9);
-  --ludo-badge-h: 74px;
-  --ludo-badge-w: clamp(150px, 21vw, 240px);
 
   position: relative;
   height: 100%;
@@ -100,12 +98,13 @@
 .ludo-scene__table {
   flex: 1;
   min-height: 0;
-  container-type: size;
   display: grid;
   place-items: center;
   padding: var(--space-2) var(--space-4) max(env(safe-area-inset-bottom, 0px), var(--space-4));
 }
 
+/* Board size, badge size and tall/wide arrangement are measured in
+   LudoScene (useBoxSize) and arrive as px custom properties. */
 .ludo-table {
   display: grid;
   gap: 10px;
@@ -135,45 +134,42 @@
   min-width: 0;
 }
 
-@container (orientation: portrait) {
-  .ludo-table {
-    --board: min(100cqw, 100cqh - 2 * var(--ludo-badge-h) - 20px);
-    width: var(--board);
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "tl tr"
-      "board board"
-      "bl br";
-  }
-  .ludo-table__slot--top-right,
-  .ludo-table__slot--bottom-right {
-    justify-content: flex-end;
-  }
+/* Tall screens: scorecards above and below the board. */
+.ludo-table--tall {
+  width: var(--board);
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "tl tr"
+    "board board"
+    "bl br";
 }
 
-@container (orientation: landscape) {
-  .ludo-table {
-    --board: min(100cqh, 100cqw - 2 * var(--ludo-badge-w) - 20px);
-    grid-template-columns: var(--ludo-badge-w) var(--board) var(--ludo-badge-w);
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas:
-      "tl board tr"
-      "bl board br";
-  }
-  .ludo-table__slot--top-left,
-  .ludo-table__slot--top-right {
-    align-items: flex-start;
-  }
-  .ludo-table__slot--bottom-left,
-  .ludo-table__slot--bottom-right {
-    align-items: flex-end;
-  }
-  .ludo-table__slot {
-    justify-content: stretch;
-  }
-  .ludo-table__slot .ludo-badge {
-    width: 100%;
-  }
+.ludo-table--tall .ludo-table__slot--top-right,
+.ludo-table--tall .ludo-table__slot--bottom-right {
+  justify-content: flex-end;
+}
+
+/* Wide screens: scorecards beside the board. */
+.ludo-table--wide {
+  grid-template-columns: var(--badge-w) var(--board) var(--badge-w);
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "tl board tr"
+    "bl board br";
+}
+
+.ludo-table--wide .ludo-table__slot--top-left,
+.ludo-table--wide .ludo-table__slot--top-right {
+  align-items: flex-start;
+}
+
+.ludo-table--wide .ludo-table__slot--bottom-left,
+.ludo-table--wide .ludo-table__slot--bottom-right {
+  align-items: flex-end;
+}
+
+.ludo-table--wide .ludo-badge {
+  width: 100%;
 }
 
 /* ---- Player scorecards ---------------------------------------------------- */
@@ -747,9 +743,6 @@
 /* ---- Small screens ---------------------------------------------------------- */
 
 @media (max-width: 520px) {
-  .ludo-scene {
-    --ludo-badge-h: 60px;
-  }
   .ludo-scene__hud .big-button__label {
     display: none;
   }

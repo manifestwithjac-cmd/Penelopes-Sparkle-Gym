@@ -28,10 +28,11 @@ body {
   width: 100%;
 }
 
+/* 100% (not 100vh/100dvh) so the app fits inside any padding the page
+   adds for the iPad's safe areas instead of running off the bottom. */
 .app-root {
   height: 100%;
   width: 100%;
-  height: 100dvh;
 }
 
 [data-reduced-motion="true"] * {

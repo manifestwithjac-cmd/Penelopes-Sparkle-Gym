@@ -20,7 +20,10 @@ import {
   nothingOnLoop,
   piecePoint,
   rollDie,
+  type ComputerLevel,
   type LudoMove,
+  type PieceCount,
+  type SixBoost,
   type Tokens,
 } from "./ludoRules";
 
@@ -64,9 +67,20 @@ interface LudoData {
   message: string;
   winner: LudoSeatId | null;
   burst: LudoBurst | null;
-  /** Makes 6s come up more often so pieces get out of the locker room sooner. */
-  luckySixes: boolean;
+  settings: LudoSettings;
 }
+
+export interface LudoSettings {
+  /** How many times more likely a 6 is than any other face. Higher = faster games. */
+  sixBoost: SixBoost;
+  /** How hard the computer players try (easy ones never bump a real player). */
+  level: ComputerLevel;
+  /** Pieces per player. Fewer = shorter games. */
+  pieceCount: PieceCount;
+}
+
+/** Tuned for a 5-year-old: gentle computers, lots of 6s, the full set of pieces. */
+export const DEFAULT_LUDO_SETTINGS: LudoSettings = { sixBoost: 3, level: "easy", pieceCount: 4 };
 
 interface LudoActions {
   roll: () => void;
@@ -76,7 +90,12 @@ interface LudoActions {
   endPass: () => void;
   newGame: () => void;
   setPlayer: (seat: LudoSeatId, change: { name?: string; kind?: LudoPlayerKind }) => void;
-  toggleLuckySixes: () => void;
+  /** An easy computer whose only moves would bump a real player skips its move instead. */
+  skipKindly: () => void;
+  setSixBoost: (boost: SixBoost) => void;
+  setLevel: (level: ComputerLevel) => void;
+  /** Changing the piece count starts a new game. */
+  setPieceCount: (count: PieceCount) => void;
 }
 
 export type LudoState = LudoData & LudoActions;
@@ -101,11 +120,11 @@ function turnStart(data: Pick<LudoData, "tokens" | "names">, seat: LudoSeatId): 
 function initialData(
   kinds?: Record<LudoSeatId, LudoPlayerKind>,
   names?: Record<LudoSeatId, string>,
-  luckySixes = true,
+  settings: LudoSettings = DEFAULT_LUDO_SETTINGS,
 ): LudoData {
   const seatKinds = kinds ?? (Object.fromEntries(LUDO_SEATS.map((s) => [s.id, s.defaultKind])) as LudoData["kinds"]);
   const seatNames = names ?? (Object.fromEntries(LUDO_SEATS.map((s) => [s.id, s.defaultName])) as LudoData["names"]);
-  const tokens = freshTokens();
+  const tokens = freshTokens(settings.pieceCount);
   const first = activeSeats(seatKinds)[0] ?? "pink";
   const base: LudoData = {
     kinds: seatKinds,
@@ -122,7 +141,7 @@ function initialData(
     message: "",
     winner: null,
     burst: null,
-    luckySixes,
+    settings,
   };
   return { ...base, ...turnStart(base, first) };
 }
@@ -136,7 +155,7 @@ export const useLudoStore = create<LudoState>()(
         const s = get();
         if (s.phase !== "roll" || s.winner) return;
         set({
-          dice: rollDie(s.luckySixes),
+          dice: rollDie(s.settings.sixBoost),
           rollCount: s.rollCount + 1,
           phase: "rolling",
           message: `${s.names[s.turn]} is rolling…`,
@@ -259,10 +278,21 @@ export const useLudoStore = create<LudoState>()(
 
       newGame: () => {
         const s = get();
-        set(initialData(s.kinds, s.names, s.luckySixes));
+        set(initialData(s.kinds, s.names, s.settings));
       },
 
-      toggleLuckySixes: () => set((s) => ({ luckySixes: !s.luckySixes })),
+      skipKindly: () => {
+        const s = get();
+        if (s.phase !== "pick") return;
+        set({ phase: "pass", moves: [], message: `${s.names[s.turn]} is being kind and skips this turn! 💕` });
+      },
+
+      setSixBoost: (sixBoost) => set((s) => ({ settings: { ...s.settings, sixBoost } })),
+      setLevel: (level) => set((s) => ({ settings: { ...s.settings, level } })),
+      setPieceCount: (pieceCount) => {
+        const s = get();
+        set(initialData(s.kinds, s.names, { ...s.settings, pieceCount }));
+      },
 
       setPlayer: (seat, change) => {
         const s = get();
@@ -278,7 +308,7 @@ export const useLudoStore = create<LudoState>()(
 
         const switchedOnOrOff = (s.kinds[seat] === "off") !== (kinds[seat] === "off");
         if (switchedOnOrOff) {
-          patch.tokens = { ...s.tokens, [seat]: [-1, -1, -1, -1] };
+          patch.tokens = { ...s.tokens, [seat]: freshTokens(s.settings.pieceCount)[seat] };
           patch.bumps = { ...s.bumps, [seat]: 0 };
         }
         if (kinds[seat] === "off" && s.turn === seat && !s.winner) {
@@ -291,7 +321,17 @@ export const useLudoStore = create<LudoState>()(
     }),
     {
       name: "penelopes-sparkle-gym-ludo",
-      version: 1,
+      version: 2,
+      // v1 saves had a single on/off "luckySixes" switch and always-hard computers.
+      migrate: (persisted, version) => {
+        const old = persisted as Partial<LudoData> & { luckySixes?: boolean };
+        if (version < 2) {
+          const pieceCount = (old.tokens?.pink.length ?? 4) as PieceCount;
+          old.settings = { ...DEFAULT_LUDO_SETTINGS, sixBoost: old.luckySixes === false ? 1 : 3, pieceCount };
+          delete old.luckySixes;
+        }
+        return old as LudoData;
+      },
       // The star burst is a one-shot effect, so it isn't saved (it would replay on reload).
       partialize: (state): Omit<LudoData, "burst"> => ({
         kinds: state.kinds,
@@ -307,7 +347,7 @@ export const useLudoStore = create<LudoState>()(
         moving: state.moving,
         message: state.message,
         winner: state.winner,
-        luckySixes: state.luckySixes,
+        settings: state.settings,
       }),
     },
   ),

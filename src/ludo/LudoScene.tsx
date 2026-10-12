@@ -7,7 +7,14 @@ import { BigButton } from "../components/ui/BigButton";
 import { SoundToggle } from "../components/ui/SoundToggle";
 import { LudoBoard } from "./LudoBoard";
 import { LudoPiece } from "./LudoPiece";
-import { chooseComputerMove } from "./ludoRules";
+import {
+  PIECE_COUNTS,
+  SIX_BOOSTS,
+  chooseComputerMove,
+  sixChance,
+  type ComputerLevel,
+  type PieceCount,
+} from "./ludoRules";
 import { LUDO_WIN_STARS, activeSeats, useLudoStore } from "./ludoStore";
 import "./LudoScene.css";
 
@@ -59,9 +66,10 @@ function useLudoDriver(play: ReturnType<typeof useSound>) {
         const s = useLudoStore.getState();
         if (s.phase !== "pick" || s.moves.length === 0) return;
         const move = isComputer
-          ? chooseComputerMove(s.tokens, s.turn, s.moves, activeSeats(s.kinds))
+          ? chooseComputerMove(s.tokens, s.turn, s.moves, activeSeats(s.kinds), s.settings.level, s.kinds)
           : s.moves[0];
-        s.pickMove(move.token);
+        if (move) s.pickMove(move.token);
+        else s.skipKindly();
       };
     }
 
@@ -104,6 +112,7 @@ function PlayerBadge({ seatId, onSetup }: { seatId: LudoSeatId; onSetup: () => v
   const bumps = useLudoStore((s) => s.bumps[seatId]);
   const isTurn = useLudoStore((s) => s.turn === seatId && !s.winner);
   const home = useLudoStore((s) => s.tokens[seatId].filter((p) => p >= 47).length);
+  const pieces = useLudoStore((s) => s.tokens[seatId].length);
 
   return (
     <button
@@ -118,7 +127,7 @@ function PlayerBadge({ seatId, onSetup }: { seatId: LudoSeatId; onSetup: () => v
       <span className="ludo-badge__text">
         <span className="ludo-badge__name">{name}</span>
         <span className="ludo-badge__meta">
-          {kind === "off" ? "Tap to join" : `${KIND_ICON[kind]} ${home}/4 home · ${bumps} bumps`}
+          {kind === "off" ? "Tap to join" : `${KIND_ICON[kind]} ${home}/${pieces} home · ${bumps} bumps`}
         </span>
       </span>
       {isTurn && <span className="ludo-badge__turn">Your turn!</span>}
@@ -198,59 +207,129 @@ function SetupSheet({ seatId, onClose }: { seatId: LudoSeatId; onClose: () => vo
   );
 }
 
+const LEVELS: { id: ComputerLevel; label: string; icon: string; help: string }[] = [
+  { id: "easy", label: "Easy", icon: "🧸", help: "Computers never bump your pieces home." },
+  { id: "medium", label: "Medium", icon: "🌟", help: "Computers only sometimes bump your pieces." },
+  { id: "hard", label: "Hard", icon: "🔥", help: "Computers play to win and bump anyone." },
+];
+
+/** A row of big tap-to-pick choices (radio group) for one game setting. */
+function Choice<T extends string | number>({
+  label,
+  help,
+  options,
+  value,
+  onPick,
+}: {
+  label: string;
+  help: string;
+  options: { id: T; label: string; icon?: string }[];
+  value: T;
+  onPick: (id: T) => void;
+}) {
+  return (
+    <div className="ludo-choice">
+      <div className="ludo-choice__head">
+        <span className="ludo-choice__label">{label}</span>
+        <span className="ludo-choice__help">{help}</span>
+      </div>
+      <div className="ludo-choice__options" role="radiogroup" aria-label={label}>
+        {options.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={value === o.id}
+            className={`ludo-choice__option ${value === o.id ? "ludo-choice__option--on" : ""}`}
+            onClick={() => onPick(o.id)}
+          >
+            {o.icon && <span aria-hidden="true">{o.icon} </span>}
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: boolean }) {
   const newGame = useLudoStore((s) => s.newGame);
-  const luckySixes = useLudoStore((s) => s.luckySixes);
-  const toggleLuckySixes = useLudoStore((s) => s.toggleLuckySixes);
+  const settings = useLudoStore((s) => s.settings);
+  const setSixBoost = useLudoStore((s) => s.setSixBoost);
+  const setLevel = useLudoStore((s) => s.setLevel);
+  const setPieceCount = useLudoStore((s) => s.setPieceCount);
   const goToScene = useGameStore((s) => s.goToScene);
-  const [confirming, setConfirming] = useState(false);
+  // A new game, or a new piece count (which also restarts), waits for a yes.
+  const [confirming, setConfirming] = useState<null | { pieces: PieceCount }>(null);
+
+  const sixPercent = Math.round(sixChance(settings.sixBoost) * 100);
 
   return (
     <div className="ludo-sheet-layer" onClick={onClose}>
       <div className="ludo-sheet ludo-sheet--menu" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Game menu">
         <h2 className="ludo-sheet__title">Sparkle Ludo</h2>
-        <ul className="ludo-rules">
-          <li>Roll a <b>6</b> to bring a piece out of the locker room.</li>
-          <li>Nothing out yet? You get <b>3 tries</b> to roll that 6.</li>
-          <li>Rolled a 6? <b>Roll again!</b></li>
-          <li>Land on someone to <b>bump</b> them back to their locker room.</li>
-          <li>Get all 4 pieces up your beam to the podium to win the gold medal.</li>
-        </ul>
-        <button
-          type="button"
-          className={`ludo-lucky ${luckySixes ? "ludo-lucky--on" : ""}`}
-          aria-pressed={luckySixes}
-          onClick={toggleLuckySixes}
-        >
-          <span className="ludo-lucky__text">
-            <span className="ludo-lucky__title">🍀 Lucky 6s</span>
-            <span className="ludo-lucky__sub">
-              {luckySixes ? "6 comes up 1 roll in 3" : "Regular dice: 6 comes up 1 roll in 6"}
-            </span>
-          </span>
-          <span className="ludo-lucky__switch" aria-hidden="true" />
-        </button>
+
+        <Choice
+          label="Computer players"
+          help={LEVELS.find((l) => l.id === settings.level)!.help}
+          options={LEVELS}
+          value={settings.level}
+          onPick={setLevel}
+        />
+        <Choice
+          label="🍀 Lucky 6s"
+          help={
+            settings.sixBoost === 1
+              ? `Regular dice: a 6 comes up ${sixPercent}% of the time.`
+              : `A 6 comes up ${sixPercent}% of the time. More 6s = faster game!`
+          }
+          options={SIX_BOOSTS.map((b) => ({ id: b, label: b === 1 ? "Off" : `${b}×` }))}
+          value={settings.sixBoost}
+          onPick={setSixBoost}
+        />
+        <Choice
+          label="Pieces each"
+          help={
+            settings.pieceCount === 4
+              ? "The full game. Fewer pieces = a shorter game."
+              : `A shorter game: get ${settings.pieceCount} pieces home to win.`
+          }
+          options={PIECE_COUNTS.map((n) => ({ id: n, label: String(n) }))}
+          value={settings.pieceCount}
+          onPick={(pieces) => pieces !== settings.pieceCount && setConfirming({ pieces })}
+        />
+
         {confirming ? (
           <div className="ludo-sheet__confirm">
-            <p>Start over? Every piece goes back to its locker room.</p>
+            <p>
+              {confirming.pieces === settings.pieceCount
+                ? "Start over? Every piece goes back to its locker room."
+                : `Start a new game with ${confirming.pieces} pieces each?`}
+            </p>
             <div className="ludo-sheet__row">
               <BigButton
                 size="md"
                 onClick={() => {
-                  newGame();
+                  if (confirming.pieces === settings.pieceCount) newGame();
+                  else setPieceCount(confirming.pieces);
                   onClose();
                 }}
               >
                 Yes, new game
               </BigButton>
-              <BigButton size="md" variant="ghost" onClick={() => setConfirming(false)}>
+              <BigButton size="md" variant="ghost" onClick={() => setConfirming(null)}>
                 Keep playing
               </BigButton>
             </div>
           </div>
         ) : (
           <div className="ludo-sheet__row">
-            <BigButton size="md" variant="secondary" icon="🔄" onClick={() => setConfirming(true)}>
+            <BigButton
+              size="md"
+              variant="secondary"
+              icon="🔄"
+              onClick={() => setConfirming({ pieces: settings.pieceCount })}
+            >
               New game
             </BigButton>
             {showGymExit && (
@@ -260,6 +339,18 @@ function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: 
             )}
           </div>
         )}
+
+        <details className="ludo-howto">
+          <summary>How to play</summary>
+          <ul className="ludo-rules">
+            <li>Roll a <b>6</b> to bring a piece out of the locker room.</li>
+            <li>Nothing out yet? You get <b>3 tries</b> to roll that 6.</li>
+            <li>Rolled a 6? <b>Roll again!</b></li>
+            <li>Land on someone to <b>bump</b> them back to their locker room.</li>
+            <li>Get all {settings.pieceCount} pieces up your beam to the podium to win the gold medal.</li>
+          </ul>
+        </details>
+
         <button className="ludo-sheet__close" onClick={onClose} aria-label="Close menu">
           ✕
         </button>

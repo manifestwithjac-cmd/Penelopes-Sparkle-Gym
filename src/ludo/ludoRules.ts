@@ -88,8 +88,13 @@ export interface LudoMove {
   bumps: { seat: LudoSeatId; token: number } | null;
 }
 
-export function freshTokens(): Tokens {
-  return { pink: [-1, -1, -1, -1], sky: [-1, -1, -1, -1], gold: [-1, -1, -1, -1], purple: [-1, -1, -1, -1] };
+export const PIECE_COUNTS = [2, 3, 4] as const;
+export type PieceCount = (typeof PIECE_COUNTS)[number];
+
+/** Everyone starts in their locker room. Fewer pieces each = a shorter game. */
+export function freshTokens(pieceCount: PieceCount = 4): Tokens {
+  const base = () => Array.from({ length: pieceCount }, () => IN_BASE);
+  return { pink: base(), sky: base(), gold: base(), purple: base() };
 }
 
 export function hasFinished(tokens: number[]): boolean {
@@ -144,13 +149,18 @@ export function stepPath(from: number, to: number): number[] {
   return path;
 }
 
-/** Chance of a 6 when "Lucky 6s" is on (a fair die is 1 in 6). */
-export const LUCKY_SIX_CHANCE = 1 / 3;
+/** "Lucky 6s" settings: how many times more likely a 6 is than each other face (1 = a fair die). */
+export const SIX_BOOSTS = [1, 2, 3, 4, 5, 6] as const;
+export type SixBoost = (typeof SIX_BOOSTS)[number];
 
-/** Rolls the die. With lucky sixes on, a 6 comes up 1 time in 3 and 1-5 share the rest evenly. */
-export function rollDie(luckySixes: boolean, random: () => number = Math.random): number {
-  if (!luckySixes) return 1 + Math.floor(random() * 6);
-  return random() < LUCKY_SIX_CHANCE ? 6 : 1 + Math.floor(random() * 5);
+/** Chance a roll comes up 6: the 6 face counts `boost` times, 1-5 count once each. */
+export function sixChance(boost: SixBoost): number {
+  return boost / (5 + boost);
+}
+
+export function rollDie(boost: SixBoost, random: () => number = Math.random): number {
+  const r = random() * (5 + boost);
+  return r >= 5 ? 6 : 1 + Math.floor(r);
 }
 
 export function nextSeat(current: LudoSeatId, kinds: Record<LudoSeatId, LudoPlayerKind>): LudoSeatId {
@@ -182,24 +192,53 @@ function threatsAt(tokens: Tokens, seat: LudoSeatId, progress: number, active: L
   return threats;
 }
 
-/** A friendly-but-sensible computer: finish, bump, come out, stay safe, then push ahead. */
+export type ComputerLevel = "easy" | "medium" | "hard";
+
+/**
+ * Picks a computer player's move, or `null` when an easy computer would
+ * rather skip than bump a real player's piece.
+ *
+ *   easy    never bumps a real player (skips its move if that's all it has),
+ *           plays loosely, doesn't bother staying safe
+ *   medium  usually steers around real players' pieces, bumps other computers on purpose
+ *   hard    plays to win: finish, bump anyone, come out, stay safe, push ahead
+ */
 export function chooseComputerMove(
   tokens: Tokens,
   seat: LudoSeatId,
   moves: LudoMove[],
   active: LudoSeatId[],
+  level: ComputerLevel,
+  kinds: Record<LudoSeatId, LudoPlayerKind>,
   random: () => number = Math.random,
-): LudoMove {
-  let best = moves[0];
+): LudoMove | null {
+  const bumpsKid = (m: LudoMove) => m.bumps !== null && kinds[m.bumps.seat] === "kid";
+  let options = moves;
+  if (level === "easy") {
+    options = moves.filter((m) => !bumpsKid(m));
+    if (options.length === 0) return null;
+  }
+
+  let best = options[0];
   let bestScore = -Infinity;
-  for (const move of moves) {
-    let score = random() * 4;
-    if (move.from <= LAST_LOOP_STEP && move.to >= FIRST_HOME_STEP) score += 60;
-    if (move.bumps) score += 50 + tokens[move.bumps.seat][move.bumps.token] / 2;
-    if (move.from === IN_BASE) score += 40;
-    score -= threatsAt(tokens, seat, move.to, active) * 25;
-    score += threatsAt(tokens, seat, move.from, active) * 20;
-    score += move.to / 10;
+  for (const move of options) {
+    let score: number;
+    if (level === "easy") {
+      score = random() * 30;
+      if (move.from <= LAST_LOOP_STEP && move.to >= FIRST_HOME_STEP) score += 20;
+      if (move.from === IN_BASE) score += 10;
+    } else {
+      const hard = level === "hard";
+      score = random() * (hard ? 4 : 15);
+      if (move.from <= LAST_LOOP_STEP && move.to >= FIRST_HOME_STEP) score += 60;
+      if (move.bumps && (hard || !bumpsKid(move))) score += 50 + tokens[move.bumps.seat][move.bumps.token] / 2;
+      if (!hard && bumpsKid(move)) score -= 45;
+      if (move.from === IN_BASE) score += 40;
+      const safety = hard ? 1 : 0.4;
+      score -= threatsAt(tokens, seat, move.to, active) * 25 * safety;
+      score += threatsAt(tokens, seat, move.from, active) * 20 * safety;
+      score += move.to / 10;
+    }
     if (score > bestScore) {
       bestScore = score;
       best = move;

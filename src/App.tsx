@@ -14,6 +14,7 @@ import { WarScene } from "./war/WarScene";
 import { CelebrationToast } from "./effects/CelebrationToast";
 import { unlock as unlockAudio, startMusic, stopMusic } from "./audio/audioEngine";
 import { useSceneBridge } from "./three/sceneBridge";
+import { CanvasErrorBoundary } from "./three/CanvasErrorBoundary";
 import type { ApparatusId } from "./data/types";
 
 // three.js + @react-three/fiber + drei are large — code-split them out of
@@ -100,9 +101,11 @@ function App() {
   return (
     <div className="app-root">
       {SHOW_3D_SCENES.has(scene) && (
-        <Suspense fallback={null}>
-          <GymCanvas />
-        </Suspense>
+        <CanvasErrorBoundary>
+          <Suspense fallback={null}>
+            <GymCanvas />
+          </Suspense>
+        </CanvasErrorBoundary>
       )}
       {scene === "title" && <TitleScreen />}
       {scene === "gym" && <GymScene />}

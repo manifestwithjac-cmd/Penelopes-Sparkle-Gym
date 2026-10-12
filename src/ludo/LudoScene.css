@@ -328,9 +328,10 @@
   width: calc(100% / 13 * 0.86);
   height: calc(100% / 13 * 0.86);
   transform: translate(-50%, -50%);
+  /* Linear so a multi-spot move reads as one smooth glide, no stop at each spot. */
   transition:
-    left 200ms var(--ease-soft),
-    top 200ms var(--ease-soft);
+    left var(--ludo-step-ms, 240ms) linear,
+    top var(--ludo-step-ms, 240ms) linear;
   padding: 0;
   z-index: 2;
 }
@@ -368,11 +369,6 @@
   z-index: 5;
 }
 
-/* Every hop is a tiny cartwheel. */
-.ludo-token--moving .ludo-token__body {
-  animation: ludoCartwheel 220ms var(--ease-soft);
-}
-
 .ludo-token--home .ludo-piece__twinkle {
   animation: ludoTwinkle 1.4s ease-in-out infinite;
 }
@@ -389,18 +385,6 @@
   }
   to {
     transform: translateY(-14%) scale(1.1);
-  }
-}
-
-@keyframes ludoCartwheel {
-  0% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-38%) rotate(180deg) scale(1.12);
-  }
-  100% {
-    transform: translateY(0) rotate(360deg);
   }
 }
 
@@ -687,6 +671,78 @@
 
 .ludo-rules b {
   color: var(--pink-600);
+}
+
+.ludo-lucky {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 3px solid var(--pink-100);
+  background: var(--pink-50);
+  text-align: left;
+}
+
+.ludo-lucky--on {
+  border-color: var(--mint-500);
+  background: color-mix(in srgb, var(--mint-300) 35%, var(--white));
+}
+
+.ludo-lucky:focus-visible {
+  outline: 4px solid var(--purple-400);
+  outline-offset: 2px;
+}
+
+.ludo-lucky__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.ludo-lucky__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.ludo-lucky__sub {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.ludo-lucky__switch {
+  flex: none;
+  position: relative;
+  width: 52px;
+  height: 30px;
+  border-radius: var(--radius-round);
+  background: var(--pink-200);
+  transition: background var(--dur-fast);
+}
+
+.ludo-lucky__switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.ludo-lucky--on .ludo-lucky__switch {
+  background: var(--mint-500);
+}
+
+.ludo-lucky--on .ludo-lucky__switch::after {
+  transform: translateX(22px);
 }
 
 /* ---- Win overlay ----------------------------------------------------------- */

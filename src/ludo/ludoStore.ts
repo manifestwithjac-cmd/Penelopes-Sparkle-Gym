@@ -14,18 +14,19 @@ import {
   LAST_LOOP_STEP,
   freshTokens,
   hasFinished,
-  hopPath,
+  stepPath,
   legalMoves,
   nextSeat,
   nothingOnLoop,
   piecePoint,
+  rollDie,
   type LudoMove,
   type Tokens,
 } from "./ludoRules";
 
 /*
   Sparkle Ludo game state. Every transition is a store action; the scene
-  only decides *when* to call them (dice tumble time, hop speed, computer
+  only decides *when* to call them (dice tumble time, step speed, computer
   thinking pauses). That keeps a half-finished game resumable: if the iPad
   sleeps mid-move, the saved phase picks up exactly where it stopped.
 */
@@ -63,6 +64,8 @@ interface LudoData {
   message: string;
   winner: LudoSeatId | null;
   burst: LudoBurst | null;
+  /** Makes 6s come up more often so pieces get out of the locker room sooner. */
+  luckySixes: boolean;
 }
 
 interface LudoActions {
@@ -73,6 +76,7 @@ interface LudoActions {
   endPass: () => void;
   newGame: () => void;
   setPlayer: (seat: LudoSeatId, change: { name?: string; kind?: LudoPlayerKind }) => void;
+  toggleLuckySixes: () => void;
 }
 
 export type LudoState = LudoData & LudoActions;
@@ -94,7 +98,11 @@ function turnStart(data: Pick<LudoData, "tokens" | "names">, seat: LudoSeatId): 
   };
 }
 
-function initialData(kinds?: Record<LudoSeatId, LudoPlayerKind>, names?: Record<LudoSeatId, string>): LudoData {
+function initialData(
+  kinds?: Record<LudoSeatId, LudoPlayerKind>,
+  names?: Record<LudoSeatId, string>,
+  luckySixes = true,
+): LudoData {
   const seatKinds = kinds ?? (Object.fromEntries(LUDO_SEATS.map((s) => [s.id, s.defaultKind])) as LudoData["kinds"]);
   const seatNames = names ?? (Object.fromEntries(LUDO_SEATS.map((s) => [s.id, s.defaultName])) as LudoData["names"]);
   const tokens = freshTokens();
@@ -114,6 +122,7 @@ function initialData(kinds?: Record<LudoSeatId, LudoPlayerKind>, names?: Record<
     message: "",
     winner: null,
     burst: null,
+    luckySixes,
   };
   return { ...base, ...turnStart(base, first) };
 }
@@ -127,7 +136,7 @@ export const useLudoStore = create<LudoState>()(
         const s = get();
         if (s.phase !== "roll" || s.winner) return;
         set({
-          dice: 1 + Math.floor(Math.random() * 6),
+          dice: rollDie(s.luckySixes),
           rollCount: s.rollCount + 1,
           phase: "rolling",
           message: `${s.names[s.turn]} is rolling…`,
@@ -172,7 +181,7 @@ export const useLudoStore = create<LudoState>()(
         set({
           phase: "moving",
           moves: [],
-          moving: { token, path: hopPath(move.from, move.to), step: 0, bumps: move.bumps },
+          moving: { token, path: stepPath(move.from, move.to), step: 0, bumps: move.bumps },
         });
       },
 
@@ -250,8 +259,10 @@ export const useLudoStore = create<LudoState>()(
 
       newGame: () => {
         const s = get();
-        set(initialData(s.kinds, s.names));
+        set(initialData(s.kinds, s.names, s.luckySixes));
       },
+
+      toggleLuckySixes: () => set((s) => ({ luckySixes: !s.luckySixes })),
 
       setPlayer: (seat, change) => {
         const s = get();
@@ -296,6 +307,7 @@ export const useLudoStore = create<LudoState>()(
         moving: state.moving,
         message: state.message,
         winner: state.winner,
+        luckySixes: state.luckySixes,
       }),
     },
   ),

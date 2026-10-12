@@ -12,17 +12,18 @@ import { LUDO_WIN_STARS, activeSeats, useLudoStore } from "./ludoStore";
 import "./LudoScene.css";
 
 // Pacing, tuned for a 5-year-old watching: slow enough to follow every
-// hop, quick enough that computer turns don't drag.
+// step, quick enough that computer turns don't drag.
 const DICE_TUMBLE_MS = 750;
-const HOP_MS = 230;
+/** One spot of movement. The board's glide transition uses the same value so pieces slide without stopping. */
+const STEP_MS = 240;
 const PASS_MS = 1300;
 const COMPUTER_ROLL_MS = 900;
 const PICK_DELAY_MS = 650;
 
 const KIND_ICON: Record<LudoPlayerKind, string> = { kid: "🙋‍♀️", computer: "🤖", off: "💤" };
 
-/** Drives the game clock: dice tumbles, piece hops and computer turns. */
-function useLudoDriver() {
+/** Drives the game clock: dice tumbles, piece steps and computer turns. */
+function useLudoDriver(play: ReturnType<typeof useSound>) {
   const phase = useLudoStore((s) => s.phase);
   const turn = useLudoStore((s) => s.turn);
   const step = useLudoStore((s) => s.moving?.step ?? -1);
@@ -39,8 +40,13 @@ function useLudoDriver() {
       delay = DICE_TUMBLE_MS;
       action = store.settleRoll;
     } else if (phase === "moving") {
-      delay = HOP_MS;
-      action = store.stepMove;
+      // The first step goes right away so the piece answers the tap; the
+      // tick plays in the same moment the piece starts gliding.
+      delay = step === 0 ? 0 : STEP_MS;
+      action = () => {
+        store.stepMove();
+        play("tap");
+      };
     } else if (phase === "pass") {
       delay = PASS_MS;
       action = store.endPass;
@@ -62,14 +68,12 @@ function useLudoDriver() {
     if (delay < 0) return;
     const id = window.setTimeout(action, delay);
     return () => window.clearTimeout(id);
-  }, [phase, turn, step, rollCount, triesLeft, isComputer]);
+  }, [phase, turn, step, rollCount, triesLeft, isComputer, play]);
 }
 
-/** Plays sounds in response to game events (rolls, hops, bumps, wins). */
-function useLudoSounds() {
-  const play = useSound();
+/** Plays sounds in response to game events (rolls, bumps, wins). Step ticks play from the driver. */
+function useLudoSounds(play: ReturnType<typeof useSound>) {
   const rollCount = useLudoStore((s) => s.rollCount);
-  const step = useLudoStore((s) => s.moving?.step ?? -1);
   const burstKey = useLudoStore((s) => s.burst?.key ?? 0);
   const burstBig = useLudoStore((s) => s.burst?.big ?? false);
   const winner = useLudoStore((s) => s.winner);
@@ -79,10 +83,6 @@ function useLudoSounds() {
     if (first.current) return;
     play("diceRoll");
   }, [rollCount, play]);
-  useEffect(() => {
-    if (first.current || step < 0) return;
-    play("tap");
-  }, [step, play]);
   useEffect(() => {
     if (first.current || !burstKey) return;
     play(burstBig ? "sparkle" : "trampolineBoing");
@@ -200,6 +200,8 @@ function SetupSheet({ seatId, onClose }: { seatId: LudoSeatId; onClose: () => vo
 
 function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: boolean }) {
   const newGame = useLudoStore((s) => s.newGame);
+  const luckySixes = useLudoStore((s) => s.luckySixes);
+  const toggleLuckySixes = useLudoStore((s) => s.toggleLuckySixes);
   const goToScene = useGameStore((s) => s.goToScene);
   const [confirming, setConfirming] = useState(false);
 
@@ -212,8 +214,22 @@ function GameMenu({ onClose, showGymExit }: { onClose: () => void; showGymExit: 
           <li>Nothing out yet? You get <b>3 tries</b> to roll that 6.</li>
           <li>Rolled a 6? <b>Roll again!</b></li>
           <li>Land on someone to <b>bump</b> them back to their locker room.</li>
-          <li>Cartwheel all 4 pieces up your beam to the podium to win the gold medal.</li>
+          <li>Get all 4 pieces up your beam to the podium to win the gold medal.</li>
         </ul>
+        <button
+          type="button"
+          className={`ludo-lucky ${luckySixes ? "ludo-lucky--on" : ""}`}
+          aria-pressed={luckySixes}
+          onClick={toggleLuckySixes}
+        >
+          <span className="ludo-lucky__text">
+            <span className="ludo-lucky__title">🍀 Lucky 6s</span>
+            <span className="ludo-lucky__sub">
+              {luckySixes ? "6 comes up 1 roll in 3" : "Regular dice: 6 comes up 1 roll in 6"}
+            </span>
+          </span>
+          <span className="ludo-lucky__switch" aria-hidden="true" />
+        </button>
         {confirming ? (
           <div className="ludo-sheet__confirm">
             <p>Start over? Every piece goes back to its locker room.</p>
@@ -296,8 +312,9 @@ export function LudoScene({ showGymExit = true }: { showGymExit?: boolean }) {
   const turn = useLudoStore((s) => s.turn);
   const [setupSeat, setSetupSeat] = useState<LudoSeatId | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  useLudoDriver();
-  useLudoSounds();
+  const play = useSound();
+  useLudoDriver(play);
+  useLudoSounds(play);
 
   const turnSeat = LUDO_SEATS_BY_ID[turn];
 
@@ -338,7 +355,7 @@ export function LudoScene({ showGymExit = true }: { showGymExit?: boolean }) {
             </div>
           ))}
           <div className="ludo-table__board">
-            <LudoBoard />
+            <LudoBoard stepMs={STEP_MS} />
           </div>
         </div>
       </div>

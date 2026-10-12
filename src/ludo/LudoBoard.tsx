@@ -197,7 +197,12 @@ function LudoDie() {
   );
 }
 
-export function LudoBoard() {
+/**
+ * `stepMs` is the game clock's step timer. Each glide runs a little longer
+ * than that, so the next step always takes over mid-motion and a long move
+ * never pauses at a spot.
+ */
+export function LudoBoard({ stepMs }: { stepMs: number }) {
   const tokens = useLudoStore((s) => s.tokens);
   const kinds = useLudoStore((s) => s.kinds);
   const names = useLudoStore((s) => s.names);
@@ -213,7 +218,7 @@ export function LudoBoard() {
   const movable = new Set(kidPicking ? moves.map((m) => m.token) : []);
 
   return (
-    <div className="ludo-board">
+    <div className="ludo-board" style={{ "--ludo-step-ms": `${Math.round(stepMs * 1.15)}ms` } as React.CSSProperties}>
       <StaticBoard active={active} />
 
       {LUDO_SEATS.filter((seat) => active.has(seat.id)).flatMap((seat) =>
@@ -232,7 +237,7 @@ export function LudoBoard() {
               onClick={() => pickMove(i)}
               aria-label={`${names[seat.id]}'s piece ${i + 1}${isMover ? ", tap to move" : ""}`}
             >
-              <span className="ludo-token__body" key={isMoving ? `hop-${moving?.step}` : "rest"}>
+              <span className="ludo-token__body">
                 <LudoPiece seat={seat} />
               </span>
             </button>

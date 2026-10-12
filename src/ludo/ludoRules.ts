@@ -136,12 +136,21 @@ export function legalMoves(tokens: Tokens, seat: LudoSeatId, roll: number, activ
   return moves;
 }
 
-/** Steps a piece passes through on the way, one entry per hop (for the cartwheel animation). */
-export function hopPath(from: number, to: number): number[] {
+/** Spots a piece passes through on the way, one entry per step of the glide. */
+export function stepPath(from: number, to: number): number[] {
   if (from === IN_BASE) return [0];
   const path: number[] = [];
   for (let p = from + 1; p <= to; p++) path.push(p);
   return path;
+}
+
+/** Chance of a 6 when "Lucky 6s" is on (a fair die is 1 in 6). */
+export const LUCKY_SIX_CHANCE = 1 / 3;
+
+/** Rolls the die. With lucky sixes on, a 6 comes up 1 time in 3 and 1-5 share the rest evenly. */
+export function rollDie(luckySixes: boolean, random: () => number = Math.random): number {
+  if (!luckySixes) return 1 + Math.floor(random() * 6);
+  return random() < LUCKY_SIX_CHANCE ? 6 : 1 + Math.floor(random() * 5);
 }
 
 export function nextSeat(current: LudoSeatId, kinds: Record<LudoSeatId, LudoPlayerKind>): LudoSeatId {

@@ -375,6 +375,47 @@ async function testSettingsResetAndDevMode() {
   });
 }
 
+async function testSparkleLudo() {
+  await withPage(async (page, pageErrors) => {
+    await page.goto(BASE_URL, { waitUntil: "networkidle" });
+    await page.getByText("PLAY", { exact: false }).click();
+    await page.locator(".gym-scene").waitFor({ timeout: 3000 });
+    await page.evaluate(() => document.querySelector('[aria-label="Around the gym"]').click());
+    await page.locator(".world-menu").waitFor({ timeout: 3000 });
+    await page.evaluate(() =>
+      [...document.querySelectorAll("button")].find((b) => b.textContent.includes("Sparkle Ludo")).click(),
+    );
+    await page.locator(".ludo-scene").waitFor({ timeout: 3000 });
+    assert.equal(await page.locator(".ludo-token").count(), 16, "four players, four pieces each");
+
+    // Penelope (a kid player) goes first: the dice is tappable and rolling
+    // hands back a result message.
+    await page.locator(".ludo-die--ready").click();
+    await page.locator(".ludo-scene__message", { hasText: "rolled a" }).or(
+      page.locator(".ludo-scene__message", { hasText: /tries|turn/ }),
+    ).first().waitFor({ timeout: 3000 });
+
+    // Turning a seat into a computer makes that seat play on its own.
+    await page.locator(".ludo-badge", { hasText: "Mommy" }).click();
+    await page.locator(".ludo-sheet__kind", { hasText: "Computer" }).click();
+    await page.getByText("Done", { exact: true }).click();
+    await page.locator(".ludo-badge", { hasText: "Penelope" }).click();
+    await page.locator(".ludo-sheet__kind", { hasText: "Computer" }).click();
+    await page.getByText("Done", { exact: true }).click();
+    const startRolls = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("penelopes-sparkle-gym-ludo")).state.rollCount,
+    );
+    await page.waitForTimeout(6000);
+    const laterRolls = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("penelopes-sparkle-gym-ludo")).state.rollCount,
+    );
+    assert.ok(laterRolls > startRolls + 1, `computers keep rolling (${startRolls} -> ${laterRolls})`);
+
+    assert.deepEqual(pageErrors, [], `no uncaught page errors, got: ${pageErrors.join(", ")}`);
+    console.log("PASS: Sparkle Ludo opens, rolls, and computer players take turns");
+  });
+}
+
 const tests = [
   testCoreLoop,
   testReturningPlayer,
@@ -384,6 +425,7 @@ const tests = [
   testFriendInteraction,
   testWorldFeatures,
   testSettingsResetAndDevMode,
+  testSparkleLudo,
 ];
 let failed = false;
 for (const t of tests) {

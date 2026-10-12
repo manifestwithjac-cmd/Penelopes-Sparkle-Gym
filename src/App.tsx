@@ -7,6 +7,7 @@ import { ShopScene } from "./scenes/ShopScene";
 import { SnackBarScene } from "./scenes/SnackBarScene";
 import { LoungeScene } from "./scenes/LoungeScene";
 import { TrophyScene } from "./scenes/TrophyScene";
+import { LudoScene } from "./ludo/LudoScene";
 import { CelebrationToast } from "./effects/CelebrationToast";
 import { unlock as unlockAudio, startMusic, stopMusic } from "./audio/audioEngine";
 import { useSceneBridge } from "./three/sceneBridge";
@@ -109,6 +110,7 @@ function App() {
       {scene === "snackbar" && <SnackBarScene />}
       {scene === "lounge" && <LoungeScene />}
       {scene === "trophies" && <TrophyScene />}
+      {scene === "ludo" && <LudoScene />}
       <CelebrationToast />
     </div>
   );

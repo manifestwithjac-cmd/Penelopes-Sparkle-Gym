@@ -59,3 +59,16 @@ export function playSpiderSpecial() {
     })),
   );
 }
+
+/** Sparkle Ludo's dice: a quick rattle of soft clicks, rising slightly. */
+export function playDiceRattle() {
+  playSequence(
+    [0, 1, 2, 3, 4, 5].map((i) => ({
+      freq: 520 + i * 60 + Math.random() * 80,
+      duration: 0.04,
+      delaySec: i * 0.075,
+      type: "square" as const,
+      gain: 0.05,
+    })),
+  );
+}

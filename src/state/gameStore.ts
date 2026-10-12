@@ -19,11 +19,12 @@ export type SceneId =
   | "shop"
   | "snackbar"
   | "lounge"
-  | "trophies";
+  | "trophies"
+  | "ludo";
 
 export interface CelebrationEvent {
   id: string;
-  kind: "trick" | "achievement" | "leotard" | "challenge";
+  kind: "trick" | "achievement" | "leotard" | "challenge" | "game";
   title: string;
   subtitle?: string;
   icon: string;
@@ -67,6 +68,7 @@ interface GameState {
   recordTrickResult: (input: TrickResultInput) => TrickResultOutcome;
   visitApparatus: (apparatusId: ApparatusId) => void;
   equipLeotard: (leotardId: string) => void;
+  awardLudoWin: (winnerName: string, stars: number) => void;
   setCompanionFriend: (friendId: string | null) => void;
   toggleSound: () => void;
   setReducedMotion: (value: boolean) => void;
@@ -257,6 +259,19 @@ export const useGameStore = create<GameState>()(
         if (!leotard || !meetsRequirement(leotard.unlock, ctx)) return;
         set({ equippedLeotardId: leotardId });
       },
+
+      awardLudoWin: (winnerName, stars) =>
+        set((prev) => {
+          const draft: GameState = { ...prev, stars: prev.stars + stars };
+          evaluateMilestones(draft);
+          pushCelebration(draft.celebrationQueue, {
+            kind: "game",
+            title: "Sparkle Ludo Champion!",
+            subtitle: `${winnerName} won! +${stars} stars`,
+            icon: "🏅",
+          });
+          return draft;
+        }),
 
       setCompanionFriend: (friendId) =>
         set((prev) => ({ companionFriendId: prev.companionFriendId === friendId ? null : friendId })),

@@ -8,6 +8,7 @@ import {
   playSuccessCheer,
   playSparkleChime,
   playSpiderSpecial,
+  playDiceRattle,
 } from "./sounds";
 
 const SOUND_MAP = {
@@ -19,6 +20,7 @@ const SOUND_MAP = {
   bigSuccessCheer: () => playSuccessCheer(true),
   sparkle: playSparkleChime,
   spiderSpecial: playSpiderSpecial,
+  diceRoll: playDiceRattle,
 } as const;
 
 export type SoundName = keyof typeof SOUND_MAP;

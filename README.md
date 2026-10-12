@@ -52,6 +52,11 @@ src/
   shop/         Leotard shop card rendering (dressing-room UI).
   friends/      FriendSprite (world figure) + FriendPopup (dialogue,
                 challenge status, high-five).
+  ludo/         Sparkle Ludo, the pink gymnastics board game (reached from
+                the 🗺️ world menu): ludoRules.ts is the pure board + rules
+                + computer-player logic, ludoStore.ts the saved game state,
+                LudoScene/LudoBoard the UI. Seat names/colors live in
+                data/ludoSeats.ts.
   audio/        Synthesized SFX + background loop (Web Audio, no sound
                 asset files) behind one `useSound()` hook.
   dev/          Developer-only shortcuts panel, reached via a hidden
@@ -107,8 +112,8 @@ browser build, so the script launches the browser itself, sharing one
 browser instance with a fresh context per test). It covers: the core
 play loop and save persistence, all five apparatus, the leotard shop,
 the sound toggle, friend interactions, the snack bar/lounge/trophy wall
-and the 67 easter egg, and the settings reset-confirmation + dev-mode
-flow.
+and the 67 easter egg, the settings reset-confirmation + dev-mode
+flow, and Sparkle Ludo (rolling, player setup, computer turns).
 
 Run the dev server first, then:
 
